@@ -126,6 +126,7 @@ In F<example.pl>:
 
   # unknown attributes are fatal:
   eval { Employee->new( name => "Larry", OS => "Linux" ) };
+  die "Error creating Employee: $@" if $@;
 
 =head1 DESCRIPTION
 
@@ -139,7 +140,9 @@ code.  Here is a list of features:
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
 * C<new> throws an error for unknown attributes
-* may be subclassed
+* C<new> calls C<BUILD> for each class from parent to child
+* superclass provides a C<DESTROY> method
+* C<DESTROY> calls C<DEMOLISH> for each class from child to parent
 
 It uses no non-core modules (except on Perls older than 5.10, where it requires
 L<MRO::Compat> from CPAN).
@@ -156,6 +159,10 @@ more strict philsophy against feature creep that I have.
 
 Compared to everything else, this is smaller in implmentation and simpler in
 API.  (The only API is a list of attributes!)
+
+I looked for something like it on CPAN, but after checking a dozen class
+creators I realized I could implement exactly how I wanted it faster than I
+could search CPAN for something sufficient.
 
 =head1 USAGE
 
@@ -191,11 +198,20 @@ loading Class::Tiny:
 
     sub id { ... }
 
-=head2 Subclassing
+=head2 Class::Tiny is your base class
+
+If your class does not already inherit from some class, then Class::Tiny will
+be added to your C<@ISA> to provide C<new> and C<DESTROY>.  (The superclass
+C<import> method will silently do nothing for subclasses.)
+
+If your class B<does> inherit from something, then no additional inheritance is
+set up.  If the parent subclasses Class::Tiny, then all is well.  If not, then
+you'll get accessors set up but no constructor or destructor. Don't do that
+unless you really have a special need for it.
 
 Define subclasses as normal.  It's best to define them with L<base>, L<parent>
 or L<superclass> before defining attributes with Class::Tiny so the C<@ISA>
-array is populated at compile-time:
+array is already populated at compile-time:
 
     package Foo::Bar::More;
 
@@ -203,19 +219,10 @@ array is populated at compile-time:
 
     use Class::Tiny qw( shoe_size );
 
-If your class does not already inherit from some class, then Class::Tiny will
-be added to your C<@ISA> to provide C<new>.
-
-If your class B<does> inherit from something, then no additional inheritance is
-set up.  If the parent subclasses Class::Tiny, then all is well.  If not, then
-you'll get accessors set up but no constructor (or features that come with it
-like attribute validation).  Don't do that unless you really have a special
-need for it.
-
 =head2 Object construction
 
-If your class inherits from Class::Tiny (which it will by default), it provides
-the C<new> constructor for you.
+If your class inherits from Class::Tiny, it provides the C<new> constructor for
+you.
 
 Object can be created with attributes given as a hash reference or as a list
 of key/value pairs:
@@ -224,15 +231,16 @@ of key/value pairs:
 
     $obj = Foo::Bar->new( { name => "David" } );
 
-If a reference is passed as a single argument, it must be dereferenceable as a
-hash or an exception is thrown.  A shallow copy is made of the reference provided.
+If a reference is passed as a single argument, it must be able to be
+dereferenced as a hash or an exception is thrown.  A shallow copy is made of
+the reference provided.
 
 =head2 BUILD
 
-If the class or any superclass defines a C<BUILD> method, they will be called
-by the constructor from furthest parent to child after the object has been
-created.  No arguments are provided and the return value is ignored.  Use them
-for validation or setting default values.
+If your class or any superclass defines a C<BUILD> method, they will be called
+by the constructor from furthest parent class down to the child class after the
+object has been created.  No arguments are provided and the return value is
+ignored.  Use them for validation or setting default values.
 
     sub BUILD {
         my $self = shift;
@@ -241,7 +249,10 @@ for validation or setting default values.
 
 =head2 DEMOLISH
 
-To be implemented...
+Class::Tiny provides a C<DESTROY> method.  If your class or any superclass
+defines a C<DEMOLISH> method, they will be called by the constructor from the
+child class to the furthest parent class during object destruction.  No
+arguments are provided and the return value is ignored.
 
 =cut
 

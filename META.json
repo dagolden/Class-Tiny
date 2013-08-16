@@ -58,7 +58,8 @@
             "Test::Fatal" : "0",
             "Test::More" : "0.96",
             "base" : "0",
-            "lib" : "0"
+            "lib" : "0",
+            "subs" : "0"
          }
       }
    },
