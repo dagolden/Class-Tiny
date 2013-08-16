@@ -7,10 +7,12 @@ package Class::Tiny;
 # VERSION
 
 use Carp ();
-if ($] >= 5.010) {
-  require "mro.pm"; # hack to hide from perl minimum version & prereq scanners
-} else {
-  require MRO::Compat;
+
+if ( $] >= 5.010 ) {
+    require "mro.pm"; # hack to hide from perl minimum version & prereq scanners
+}
+else {
+    require MRO::Compat;
 }
 
 my %CLASS_ATTRIBUTES;
@@ -36,8 +38,8 @@ sub new {
     my $class = shift;
     my $args;
     if ( @_ == 1 && ref $_[0] ) { # hope it's a hash or hash object
-        my %copy = eval { %{ $_[0] } };   # shallow copy
-        if ( $@ ) {
+        my %copy = eval { %{ $_[0] } }; # shallow copy
+        if ($@) {
             Carp::croak("Argument to $class->new() could not be dereferenced as a hash");
         }
         $args = \%copy;
