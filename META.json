@@ -47,15 +47,16 @@
          }
       },
       "test" : {
+         "recommends" : {
+            "Test::FailWarnings" : "0"
+         },
          "requires" : {
+            "Exporter" : "0",
             "ExtUtils::MakeMaker" : "0",
             "File::Find" : "0",
             "File::Spec::Functions" : "0",
             "File::Temp" : "0",
             "List::Util" : "0",
-            "Test::Deep" : "0",
-            "Test::FailWarnings" : "0",
-            "Test::Fatal" : "0",
             "Test::More" : "0.96",
             "base" : "0",
             "lib" : "0",
