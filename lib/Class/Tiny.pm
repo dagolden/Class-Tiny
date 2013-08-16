@@ -21,6 +21,7 @@ my %CLASS_ATTRIBUTES;
 sub import {
     no strict 'refs';
     my $class = shift;
+    return unless $class eq __PACKAGE__; # NOP for subclasses
     my $pkg   = caller;
     my @attr  = @_;
     $CLASS_ATTRIBUTES{$pkg} = { map { $_ => 1 } @attr };
