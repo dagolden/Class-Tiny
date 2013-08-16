@@ -34,7 +34,7 @@ sub import {
       "package $pkg;",
       ( $child ? () : "\@${pkg}::ISA = 'Class::Tiny';" ),
       map {
-        "sub $_ { if (\@_ > 1) { \$_[0]->{$_} = \$_[1] } ; return \$_[0]->{$_} }\n"
+        "sub $_ { return \@_ == 1 ? \$_[0]->{$_} : (\$_[0]->{$_} = \$_[1]) }\n"
       } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
     #>>>
     Carp::croak("Failed to generate $pkg") if $@;
