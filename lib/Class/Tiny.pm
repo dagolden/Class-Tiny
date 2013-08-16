@@ -30,8 +30,8 @@ sub import {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'";
         "sub $_ { if (\@_ > 1) { \$_[0]->{$_} = \$_[1] } ; return \$_[0]->{$_} }\n"
-      } @attr;
-    Carp::croak( "Failed to generate $pkg" ) if $@;
+      } grep { !$pkg->can($_) } @attr;
+    Carp::croak("Failed to generate $pkg") if $@;
     return 1;
 }
 
@@ -102,7 +102,8 @@ code.  Here is a list of features:
 
 =for :list
 * defines attributes via import arguments
-* generates accessors for all attributes
+* generates read-write accessors for attributes
+* supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
 * C<new> throws an error for unknown attributes
@@ -139,12 +140,24 @@ Define attributes as a list of import arguments:
         weight
     );
 
-For each item, a read-write accessor is created:
+For each item, a read-write accessor is created unless a subroutine of that
+name already exists:
 
     $obj->name( "John Doe" );
 
 Attribute names must be valid subroutine identifiers or an exception will
 be thrown.
+
+To make your own custom accessors, just pre-declare the method name before
+loading Class::Tiny:
+
+    package Foo::Bar;
+
+    use subs 'id';
+
+    use Class::Tiny qw( name id );
+
+    sub id { ... }
 
 =head2 Subclassing
 
