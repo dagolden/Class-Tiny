@@ -54,7 +54,7 @@ subtest "constructor makes shallow copy" => sub {
     is( $obj->bar, 42, "bar is set" );
 };
 
-subtest "attributs are RW" => sub {
+subtest "attributes are RW" => sub {
     my $obj = new_ok( "Alfa", [ { foo => 23, bar => 42 } ] );
     is( $obj->foo(24), 24, "changing foo returns new value" );
     is( $obj->foo, 24, "accessing foo returns changed value" );
