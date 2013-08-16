@@ -60,7 +60,13 @@ sub new {
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
     }
-    return bless $args, $class;
+    my $self = bless $args, $class;
+    for my $s ( reverse @search ) {
+        no strict 'refs';
+        my $builder = *{ $s . "::BUILD" }{CODE};
+        $self->$builder if defined $builder;
+    }
+    return $self;
 }
 
 1;
@@ -197,7 +203,15 @@ hash or an exception is thrown.  A shallow copy is made of the reference provide
 
 =head2 BUILD
 
-To be implemented...
+If the class or any superclass defines a C<BUILD> method, they will be called
+by the constructor from furthest parent to child after the object has been
+created.  No arguments are provided and the return value is ignored.  Use them
+for validation or setting default values.
+
+    sub BUILD {
+        my $self = shift;
+        $self->foo(42) unless defined $self->foo;
+    }
 
 =head2 DEMOLISH
 
