@@ -209,9 +209,9 @@ of allowed constructor parameters.
 
 =head2 Class::Tiny is your base class
 
-If your class does not already inherit from some class, then Class::Tiny will
-be added to your C<@ISA> to provide C<new> and C<DESTROY>.  (The superclass
-C<import> method will silently do nothing for subclasses.)
+If your class B<does not> already inherit from some class, then Class::Tiny
+will be added to your C<@ISA> to provide C<new> and C<DESTROY>.  (The
+superclass C<import> method will silently do nothing for subclasses.)
 
 If your class B<does> inherit from something, then no additional inheritance is
 set up.  If the parent subclasses Class::Tiny, then all is well.  If not, then
@@ -247,8 +247,8 @@ the reference provided.
 =head2 BUILD
 
 If your class or any superclass defines a C<BUILD> method, they will be called
-by the constructor from furthest parent class down to the child class after the
-object has been created.  No arguments are provided and the return value is
+by the constructor from the furthest parent class down to the child class after
+the object has been created.  No arguments are provided and the return value is
 ignored.  Use them for validation or setting default values.
 
     sub BUILD {
@@ -260,9 +260,14 @@ ignored.  Use them for validation or setting default values.
 =head2 DEMOLISH
 
 Class::Tiny provides a C<DESTROY> method.  If your class or any superclass
-defines a C<DEMOLISH> method, they will be called from the
-child class to the furthest parent class during object destruction.  No
-arguments are provided. Return values and errors are ignored.
+defines a C<DEMOLISH> method, they will be called from the child class to the
+furthest parent class during object destruction.  No arguments are provided.
+Return values and errors are ignored.
+
+    sub DEMOLISH {
+        my $self = shift;
+        $self->cleanup();
+    }
 
 =cut
 
