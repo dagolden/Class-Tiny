@@ -69,6 +69,24 @@ sub new {
     return $self;
 }
 
+# Adapted from Moo
+sub DESTROY {
+    my $self = shift;
+
+    for my $s ( @{ mro::get_linear_isa( ref $self ) } ) {
+        no strict 'refs';
+        my $demolisher = *{ $s . "::DEMOLISH" }{CODE};
+        my $e          = do {
+            local $?;
+            local $@;
+            eval { $self->$demolisher if defined $demolisher };
+            $@;
+        };
+        no warnings 'misc'; # avoid (in cleanup) warnings
+        die $e if $e;       # rethrow
+    }
+}
+
 1;
 
 =for Pod::Coverage method_names_here

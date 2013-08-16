@@ -16,6 +16,13 @@ subtest "attribute set as list" => sub {
     is( $obj->bar, 23, "bar is set" );
 };
 
+subtest "destructor" => sub {
+    my @objs = map { new_ok( "Delta", [ foo => 42, bar => 23 ] ) } 1 .. 3;
+    is ($Delta::counter, 3, "BUILD incremented counter");
+    @objs = ();
+    is ($Delta::counter, 0, "DEMOLISH decremented counter");
+};
+
 subtest "exceptions" => sub {
     like(
         exception { Delta->new( foo => 0 ) },

@@ -12,4 +12,9 @@ sub BUILD {
     $self->baz( $self->bar + 1 );
 }
 
+sub DEMOLISH {
+    my $self = shift;
+    delete $self->{baz}; # or else Delta::DEMOLISH dies
+}
+
 1;
