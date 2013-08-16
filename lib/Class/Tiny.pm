@@ -9,7 +9,7 @@ package Class::Tiny;
 use Carp ();
 
 if ( $] >= 5.010 ) {
-    require "mro.pm"; ## no critic: hack to hide from perl minimum version & prereq scanners
+    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
 }
 else {
     require MRO::Compat;
@@ -44,7 +44,7 @@ sub new {
     if ( @_ == 1 && ref $_[0] ) {
         my %copy = eval { %{ $_[0] } }; # try shallow copy
         if ($@) {
-            Carp::croak( "Argument to $class->new() could not be dereferenced as a hash" );
+            Carp::croak("Argument to $class->new() could not be dereferenced as a hash");
         }
         $args = \%copy;
     }
