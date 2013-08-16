@@ -51,8 +51,10 @@ sub new {
         Carp::croak("$class->new() got an odd number of elements");
     }
     my @bad;
+    my @search = @{ mro::get_linear_isa($class) };
     for my $k ( keys %$args ) {
-        push @bad, $k unless $CLASS_ATTRIBUTES{$class}{$k};
+        push @bad, $k
+          unless grep { $CLASS_ATTRIBUTES{$_}{$k} } @search;
     }
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
