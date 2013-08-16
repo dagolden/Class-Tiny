@@ -38,11 +38,13 @@ sub import {
 
 sub new {
     my $class = shift;
+
+    # handle hash ref or key/value arguments
     my $args;
-    if ( @_ == 1 && ref $_[0] ) { # hope it's a hash or hash object
-        my %copy = eval { %{ $_[0] } }; # shallow copy
+    if ( @_ == 1 && ref $_[0] ) {
+        my %copy = eval { %{ $_[0] } }; # try shallow copy
         if ($@) {
-            Carp::croak("Argument to $class->new() could not be dereferenced as a hash");
+            Carp::croak( "Argument to $class->new() could not be dereferenced as a hash" );
         }
         $args = \%copy;
     }
@@ -52,6 +54,8 @@ sub new {
     else {
         Carp::croak("$class->new() got an odd number of elements");
     }
+
+    # unknown attributes are fatal
     my @bad;
     my @search = @{ mro::get_linear_isa($class) };
     for my $k ( keys %$args ) {
@@ -61,12 +65,15 @@ sub new {
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
     }
+
+    # create object and invoke BUILD
     my $self = bless $args, $class;
     for my $s ( reverse @search ) {
         no strict 'refs';
         my $builder = *{ $s . "::BUILD" }{CODE};
         $self->$builder if defined $builder;
     }
+
     return $self;
 }
 
