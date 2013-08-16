@@ -22,16 +22,21 @@ sub import {
     no strict 'refs';
     my $class = shift;
     return unless $class eq __PACKAGE__; # NOP for subclasses
-    my $pkg   = caller;
-    my @attr  = @_;
+    my $pkg  = caller;
+    my @attr = grep {
+        defined and !ref and /^[^\W\d]\w*$/s
+          or Carp::croak "Invalid accessor name '$_'"
+    } @_;
     $CLASS_ATTRIBUTES{$pkg} = { map { $_ => 1 } @attr };
     my $child = !!@{"${pkg}::ISA"};
+    #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
-      "package $pkg;", ( $child ? () : "\@${pkg}::ISA = 'Class::Tiny';" ), map {
-        defined and !ref and /^[^\W\d]\w*$/s
-          or Carp::croak "Invalid accessor name '$_'";
+      "package $pkg;",
+      ( $child ? () : "\@${pkg}::ISA = 'Class::Tiny';" ),
+      map {
         "sub $_ { if (\@_ > 1) { \$_[0]->{$_} = \$_[1] } ; return \$_[0]->{$_} }\n"
-      } grep { !$pkg->can($_) } @attr;
+      } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
+    #>>>
     Carp::croak("Failed to generate $pkg") if $@;
     return 1;
 }
