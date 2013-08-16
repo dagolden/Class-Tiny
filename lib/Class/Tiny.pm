@@ -17,6 +17,7 @@ else {
 
 my %CLASS_ATTRIBUTES;
 
+# adapted from Object::Tiny and Object::Tiny::RW
 sub import {
     no strict 'refs';
     my $class = shift;
@@ -30,7 +31,7 @@ sub import {
           or Carp::croak "Invalid accessor name '$_'";
         "sub $_ { if (\@_ > 1) { \$_[0]->{$_} = \$_[1] } ; return \$_[0]->{$_} }\n"
       } @attr;
-    die "Failed to generate $pkg" if $@;
+    Carp::croak( "Failed to generate $pkg" ) if $@;
     return 1;
 }
 
