@@ -9,7 +9,7 @@ package Class::Tiny;
 use Carp ();
 
 if ( $] >= 5.010 ) {
-    require "mro.pm"; # hack to hide from perl minimum version & prereq scanners
+    require "mro.pm"; ## no critic: hack to hide from perl minimum version & prereq scanners
 }
 else {
     require MRO::Compat;
@@ -26,7 +26,7 @@ sub import {
     my @attr  = @_;
     $CLASS_ATTRIBUTES{$pkg} = { map { $_ => 1 } @attr };
     my $child = !!@{"${pkg}::ISA"};
-    eval join "\n",
+    eval join "\n", ## no critic: intentionally eval'ing subs here
       "package $pkg;", ( $child ? () : "\@${pkg}::ISA = 'Class::Tiny';" ), map {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'";
@@ -97,7 +97,7 @@ sub DESTROY {
 
 1;
 
-=for Pod::Coverage method_names_here
+=for Pod::Coverage new
 
 =head1 SYNOPSIS
 
@@ -135,7 +135,7 @@ code.  Here is a list of features:
 
 =for :list
 * defines attributes via import arguments
-* generates read-write accessors for attributes
+* generates read-write accessors
 * supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
@@ -149,20 +149,20 @@ L<MRO::Compat> from CPAN).
 
 =head2 Why this instead of Object::Tiny or Class::Accessor or something else?
 
-I wanted something so simple that it could be potentially used by core Perl
-modules I help maintain, most of which either use L<Class::Struct> or
-roll-their-own OO framework for each one.
+I wanted something so simple that it could potentially be used by core Perl
+modules I help maintain (or hope to write), most of which either use
+L<Class::Struct> or roll-their-own OO framework each time.
 
 L<Object::Tiny> and L<Object::Tiny::RW> were close to what I wanted, but
 lacking some features I deemed necessary, and their maintainers have an even
-more strict philsophy against feature creep that I have.
+more strict philosophy against feature creep than I have.
 
-Compared to everything else, this is smaller in implmentation and simpler in
+Compared to everything else, this is smaller in implementation and simpler in
 API.  (The only API is a list of attributes!)
 
 I looked for something like it on CPAN, but after checking a dozen class
-creators I realized I could implement exactly how I wanted it faster than I
-could search CPAN for something sufficient.
+creators I realized I could implement it exactly how I wanted faster than I
+could search CPAN for something merely sufficient.
 
 =head1 USAGE
 
@@ -182,7 +182,8 @@ Define attributes as a list of import arguments:
 For each item, a read-write accessor is created unless a subroutine of that
 name already exists:
 
-    $obj->name( "John Doe" );
+    $obj->name;               # getter
+    $obj->name( "John Doe" ); # setter
 
 Attribute names must be valid subroutine identifiers or an exception will
 be thrown.
@@ -197,6 +198,9 @@ loading Class::Tiny:
     use Class::Tiny qw( name id );
 
     sub id { ... }
+
+By declaring C<id> also with Class::Tiny, you include it in the list
+of allowed constructor parameters.
 
 =head2 Class::Tiny is your base class
 
@@ -221,10 +225,10 @@ array is already populated at compile-time:
 
 =head2 Object construction
 
-If your class inherits from Class::Tiny, it provides the C<new> constructor for
-you.
+If your class inherits from Class::Tiny (as it should if you followed the
+advice above), it provides the C<new> constructor for you.
 
-Object can be created with attributes given as a hash reference or as a list
+Objects can be created with attributes given as a hash reference or as a list
 of key/value pairs:
 
     $obj = Foo::Bar->new( name => "David" );
@@ -245,14 +249,15 @@ ignored.  Use them for validation or setting default values.
     sub BUILD {
         my $self = shift;
         $self->foo(42) unless defined $self->foo;
+        croak "Foo must be non-negative" if $self->foo < 0;
     }
 
 =head2 DEMOLISH
 
 Class::Tiny provides a C<DESTROY> method.  If your class or any superclass
-defines a C<DEMOLISH> method, they will be called by the constructor from the
+defines a C<DEMOLISH> method, they will be called from the
 child class to the furthest parent class during object destruction.  No
-arguments are provided and the return value is ignored.
+arguments are provided. Return values and errors are ignored.
 
 =cut
 
