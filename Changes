@@ -2,6 +2,11 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Multiple invocations of "use Class::Tiny" in a package accumulate
+      attributes instead of overwriting them
+
 0.002     2013-08-19 17:17:24 America/New_York
 
     [CHANGED]

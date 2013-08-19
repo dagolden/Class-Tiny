@@ -67,7 +67,7 @@
    "provides" : {
       "Class::Tiny" : {
          "file" : "lib/Class/Tiny.pm",
-         "version" : "0.002"
+         "version" : "0.003"
       }
    },
    "release_status" : "stable",
@@ -82,11 +82,12 @@
          "web" : "https://github.com/dagolden/class-tiny"
       }
    },
-   "version" : "0.002",
+   "version" : "0.003",
    "x_authority" : "cpan:DAGOLDEN",
    "x_contributors" : [
       "Karen Etheridge <ether@cpan.org>",
-      "Olivier Mengu\u00e9 <dolmen@cpan.org>"
+      "Olivier Mengu\u00e9 <dolmen@cpan.org>",
+      "Toby Inkster <mail@tobyinkster.co.uk>"
    ]
 }
 
