@@ -27,12 +27,11 @@ sub import {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
     } @_;
-    $CLASS_ATTRIBUTES{$pkg} = { map { $_ => undef } @attr };
-    my $child = !!@{"${pkg}::ISA"};
+    $CLASS_ATTRIBUTES{$pkg}{$_} = undef for @attr;
+    @{"${pkg}::ISA"} = $class unless @{"${pkg}::ISA"};
     #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
       "package $pkg;",
-      ( $child ? () : "\@${pkg}::ISA = 'Class::Tiny';" ),
       map {
         "sub $_ { return \@_ == 1 ? \$_[0]->{$_} : (\$_[0]->{$_} = \$_[1]) }\n"
       } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
