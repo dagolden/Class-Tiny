@@ -8,7 +8,7 @@ Class::Tiny - Minimalist class construction
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -228,6 +228,10 @@ L<https://github.com/dagolden/class-tiny>
 =head1 AUTHOR
 
 David Golden <dagolden@cpan.org>
+
+=head1 CONTRIBUTOR
+
+Olivier Mengué <dolmen@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

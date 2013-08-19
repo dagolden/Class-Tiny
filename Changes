@@ -2,6 +2,10 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [CHANGED]
+
+    - Slight reduction in memory usage tracking attributes
+
 0.001     2013-08-16 10:48:33 America/New_York
 
     - First release

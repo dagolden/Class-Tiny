@@ -67,7 +67,7 @@
    "provides" : {
       "Class::Tiny" : {
          "file" : "lib/Class/Tiny.pm",
-         "version" : "0.001"
+         "version" : "0.002"
       }
    },
    "release_status" : "stable",
@@ -82,7 +82,10 @@
          "web" : "https://github.com/dagolden/class-tiny"
       }
    },
-   "version" : "0.001",
-   "x_authority" : "cpan:DAGOLDEN"
+   "version" : "0.002",
+   "x_authority" : "cpan:DAGOLDEN",
+   "x_contributors" : [
+      "Olivier Mengu\u00e9 <dolmen@cpan.org>"
+   ]
 }
 
