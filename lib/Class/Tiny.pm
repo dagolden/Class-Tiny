@@ -27,7 +27,7 @@ sub import {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
     } @_;
-    $CLASS_ATTRIBUTES{$pkg} = { map { $_ => 1 } @attr };
+    $CLASS_ATTRIBUTES{$pkg} = { map { $_ => undef } @attr };
     my $child = !!@{"${pkg}::ISA"};
     #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
@@ -65,7 +65,7 @@ sub new {
     my @search = @{ mro::get_linear_isa($class) };
     for my $k ( keys %$args ) {
         push @bad, $k
-          unless grep { $CLASS_ATTRIBUTES{$_}{$k} } @search;
+          unless grep { exists $CLASS_ATTRIBUTES{$_}{$k} } @search;
     }
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
