@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.002     2013-08-19 17:17:24 America/New_York
+
     [CHANGED]
 
     - Slight reduction in memory usage tracking attributes
