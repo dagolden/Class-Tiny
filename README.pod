@@ -229,9 +229,19 @@ L<https://github.com/dagolden/class-tiny>
 
 David Golden <dagolden@cpan.org>
 
-=head1 CONTRIBUTOR
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Karen Etheridge <ether@cpan.org>
+
+=item *
 
 Olivier Mengué <dolmen@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 

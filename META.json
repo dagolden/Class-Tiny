@@ -85,6 +85,7 @@
    "version" : "0.002",
    "x_authority" : "cpan:DAGOLDEN",
    "x_contributors" : [
+      "Karen Etheridge <ether@cpan.org>",
       "Olivier Mengu\u00e9 <dolmen@cpan.org>"
    ]
 }
