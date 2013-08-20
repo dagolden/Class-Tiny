@@ -76,11 +76,11 @@ sub new {
     }
 
     # create object and invoke BUILD
-    my $self = bless $args, $class;
+    my $self = bless { %$args }, $class;
     for my $s ( reverse @search ) {
         no strict 'refs';
         my $builder = *{ $s . "::BUILD" }{CODE};
-        $self->$builder if defined $builder;
+        $self->$builder($args) if defined $builder;
     }
 
     return $self;
@@ -262,13 +262,15 @@ the reference provided.
 
 =head2 BUILD
 
-If your class or any superclass defines a C<BUILD> method, they will be called
+If your class or any superclass defines a C<BUILD> method, it will be called
 by the constructor from the furthest parent class down to the child class after
-the object has been created.  No arguments are provided and the return value is
-ignored.  Use them for validation or setting default values.
+the object has been created.
+
+It is passed the constructor arguments as a hash reference.  The return value
+is ignored.  Use C<BUILD> for validation or setting default values.
 
     sub BUILD {
-        my $self = shift;
+        my ($self, $args) = @_;
         $self->foo(42) unless defined $self->foo;
         croak "Foo must be non-negative" if $self->foo < 0;
     }
