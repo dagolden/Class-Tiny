@@ -8,27 +8,19 @@ package Class::Tiny;
 
 use Carp ();
 
-if ( $] >= 5.010 ) {
-    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
-}
-else {
-    require MRO::Compat;
-}
-
 my %CLASS_ATTRIBUTES;
 
 # adapted from Object::Tiny and Object::Tiny::RW
 sub import {
     no strict 'refs';
     my $class = shift;
-    return unless $class eq __PACKAGE__; # NOP for subclasses
     my $pkg  = caller;
     my @attr = grep {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
     } @_;
     $CLASS_ATTRIBUTES{$pkg}{$_} = undef for @attr;
-    @{"${pkg}::ISA"} = $class unless @{"${pkg}::ISA"};
+    @{"${pkg}::ISA"} = "Class::Tiny::Object" unless @{"${pkg}::ISA"};
     #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
       "package $pkg;",
@@ -38,6 +30,19 @@ sub import {
     #>>>
     Carp::croak("Failed to generate $pkg") if $@;
     return 1;
+}
+
+package Class::Tiny::Object;
+# ABSTRACT: Base class for classes built with Class::Tiny
+# VERSION
+
+use Carp ();
+
+if ( $] >= 5.010 ) {
+    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
+}
+else {
+    require MRO::Compat;
 }
 
 sub new {

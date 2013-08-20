@@ -68,6 +68,10 @@
       "Class::Tiny" : {
          "file" : "lib/Class/Tiny.pm",
          "version" : "0.004"
+      },
+      "Class::Tiny::Object" : {
+         "file" : "lib/Class/Tiny.pm",
+         "version" : "0.004"
       }
    },
    "release_status" : "stable",
