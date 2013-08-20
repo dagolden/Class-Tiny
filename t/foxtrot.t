@@ -8,6 +8,14 @@ use TestUtils;
 
 require_ok("Foxtrot");
 
+subtest "attribute list" => sub {
+    is_deeply(
+        [ sort Class::Tiny->get_all_attributes_for("Foxtrot") ],
+        [ sort qw/foo bar/ ],
+        "attribute list correct",
+    );
+};
+
 subtest "attribute set as list" => sub {
     my $obj = new_ok( "Foxtrot", [ foo => 42, bar => 23 ] );
     is( $obj->foo, 42, "foo is set" );

@@ -104,7 +104,7 @@ I looked for something like it on CPAN, but after checking a dozen class
 creators I realized I could implement it exactly how I wanted faster than I
 could search CPAN for something merely sufficient.
 
-=for Pod::Coverage new
+=for Pod::Coverage new get_all_attribute_for
 
 =head1 USAGE
 
@@ -208,6 +208,15 @@ values and errors are ignored.
         my ($self, $global_destruct) = @_;
         $self->cleanup();
     }
+
+=head2 Introspection
+
+You can retrieve an unsorted list of valid attributes known to Class::Tiny
+for a class and its superclasses with the C<get_all_attributes_for> class
+method.
+
+    my @attrs = Class::Tiny->get_all_attributes_for("Employee");
+    # @attrs contains qw/name ssn/
 
 =for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 

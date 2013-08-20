@@ -8,6 +8,14 @@ use TestUtils;
 
 require_ok("Baker");
 
+subtest "attribute list" => sub {
+    is_deeply(
+        [ sort Class::Tiny->get_all_attributes_for("Baker") ],
+        [ sort qw/foo bar baz/ ],
+        "attribute list correct",
+    );
+};
+
 subtest "empty list constructor" => sub {
     my $obj = new_ok("Baker");
     is( $obj->foo, undef, "foo is undef" );

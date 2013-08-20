@@ -8,6 +8,13 @@ package Class::Tiny;
 
 use Carp ();
 
+if ( $] >= 5.010 ) {
+    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
+}
+else {
+    require MRO::Compat;
+}
+
 my %CLASS_ATTRIBUTES;
 
 # adapted from Object::Tiny and Object::Tiny::RW
@@ -32,18 +39,14 @@ sub import {
     return 1;
 }
 
+sub get_all_attributes_for {
+    my ($class, $pkg) = @_;
+    return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
+}
+
 package Class::Tiny::Object;
 # ABSTRACT: Base class for classes built with Class::Tiny
 # VERSION
-
-use Carp ();
-
-if ( $] >= 5.010 ) {
-    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
-}
-else {
-    require MRO::Compat;
-}
 
 sub new {
     my $class = shift;
@@ -118,7 +121,7 @@ sub DESTROY {
 
 1;
 
-=for Pod::Coverage new
+=for Pod::Coverage new get_all_attribute_for
 
 =head1 SYNOPSIS
 
@@ -287,6 +290,15 @@ values and errors are ignored.
         my ($self, $global_destruct) = @_;
         $self->cleanup();
     }
+
+=head2 Introspection
+
+You can retrieve an unsorted list of valid attributes known to Class::Tiny
+for a class and its superclasses with the C<get_all_attributes_for> class
+method.
+
+    my @attrs = Class::Tiny->get_all_attributes_for("Employee");
+    # @attrs contains qw/name ssn/
 
 =cut
 
