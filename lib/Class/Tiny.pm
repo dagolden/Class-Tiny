@@ -86,7 +86,19 @@ sub new {
     return $self;
 }
 
-# Adapted from Moo
+
+# Adapted from Moo and its dependencies
+
+BEGIN {
+    if ( defined ${^GLOBAL_PHASE} ) {
+        *_in_global_destruction = sub { return ${^GLOBAL_PHASE} eq 'DESTRUCT' }
+    }
+    else {
+        require Devel::GlobalDestruction;
+        *_in_global_destruction = \&Devel::GlobalDestruction::in_global_destrucution;
+    }
+}
+
 sub DESTROY {
     my $self = shift;
 
@@ -96,7 +108,7 @@ sub DESTROY {
         my $e          = do {
             local $?;
             local $@;
-            eval { $self->$demolisher if defined $demolisher };
+            eval { $self->$demolisher(_in_global_destruction()) if defined $demolisher };
             $@;
         };
         no warnings 'misc'; # avoid (in cleanup) warnings
@@ -265,11 +277,12 @@ ignored.  Use them for validation or setting default values.
 
 Class::Tiny provides a C<DESTROY> method.  If your class or any superclass
 defines a C<DEMOLISH> method, they will be called from the child class to the
-furthest parent class during object destruction.  No arguments are provided.
-Return values and errors are ignored.
+furthest parent class during object destruction.  It is provided a single
+boolean argument indicating whether Perl is in global destruction.  Return
+values and errors are ignored.
 
     sub DEMOLISH {
-        my $self = shift;
+        my ($self, $global_destruct) = @_;
         $self->cleanup();
     }
 
