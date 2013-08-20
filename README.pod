@@ -104,7 +104,7 @@ I looked for something like it on CPAN, but after checking a dozen class
 creators I realized I could implement it exactly how I wanted faster than I
 could search CPAN for something merely sufficient.
 
-=for Pod::Coverage new get_all_attribute_for
+=for Pod::Coverage new get_all_attributes_for
 
 =head1 USAGE
 

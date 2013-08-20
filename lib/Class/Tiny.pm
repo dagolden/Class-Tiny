@@ -120,7 +120,7 @@ sub DESTROY {
 
 1;
 
-=for Pod::Coverage new get_all_attribute_for
+=for Pod::Coverage new get_all_attributes_for
 
 =head1 SYNOPSIS
 
@@ -300,5 +300,6 @@ method.
     # @attrs contains qw/name ssn/
 
 =cut
+
 
 # vim: ts=4 sts=4 sw=4 et:
