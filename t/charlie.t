@@ -16,7 +16,7 @@ subtest "all attributes set as list" => sub {
 
 subtest "custom accessor" => sub {
     my $obj = new_ok( "Charlie", [ foo => 13, bar => [42] ] );
-    is_deeply( $obj->bar( qw/1 1 2 3 5/ ), [ qw/1 1 2 3 5/ ], "bar is set" );
+    is_deeply( $obj->bar(qw/1 1 2 3 5/), [qw/1 1 2 3 5/], "bar is set" );
 };
 
 done_testing;

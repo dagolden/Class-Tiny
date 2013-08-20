@@ -21,8 +21,8 @@ my %CLASS_ATTRIBUTES;
 sub import {
     no strict 'refs';
     my $class = shift;
-    my $pkg  = caller;
-    my @attr = grep {
+    my $pkg   = caller;
+    my @attr  = grep {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
     } @_;
@@ -40,7 +40,7 @@ sub import {
 }
 
 sub get_all_attributes_for {
-    my ($class, $pkg) = @_;
+    my ( $class, $pkg ) = @_;
     return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
 }
 
@@ -79,7 +79,7 @@ sub new {
     }
 
     # create object and invoke BUILD
-    my $self = bless { %$args }, $class;
+    my $self = bless {%$args}, $class;
     for my $s ( reverse @search ) {
         no strict 'refs';
         my $builder = *{ $s . "::BUILD" }{CODE};
@@ -88,7 +88,6 @@ sub new {
 
     return $self;
 }
-
 
 # Adapted from Moo and its dependencies
 
@@ -111,7 +110,7 @@ sub DESTROY {
         my $e          = do {
             local $?;
             local $@;
-            eval { $self->$demolisher(_in_global_destruction()) if defined $demolisher };
+            eval { $self->$demolisher( _in_global_destruction() ) if defined $demolisher };
             $@;
         };
         no warnings 'misc'; # avoid (in cleanup) warnings

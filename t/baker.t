@@ -40,7 +40,7 @@ subtest "subclass attribute set as list" => sub {
 subtest "superclass attribute set as list" => sub {
     my $obj = new_ok( "Baker", [ bar => 42, baz => 23 ] );
     is( $obj->foo, undef, "foo is undef" );
-    is( $obj->bar, 42, "bar is set" );
+    is( $obj->bar, 42,    "bar is set" );
     is( $obj->baz, 23,    "baz is set " );
 };
 
@@ -48,15 +48,15 @@ subtest "all attributes set as list" => sub {
     my $obj = new_ok( "Baker", [ foo => 13, bar => 42, baz => 23 ] );
     is( $obj->foo, 13, "foo is set" );
     is( $obj->bar, 42, "bar is set" );
-    is( $obj->baz, 23,    "baz is set " );
+    is( $obj->baz, 23, "baz is set " );
 };
 
 subtest "attributes are RW" => sub {
     my $obj = new_ok( "Baker", [ { foo => 23, bar => 42 } ] );
     is( $obj->foo(24), 24, "changing foo returns new value" );
-    is( $obj->foo, 24, "accessing foo returns changed value" );
+    is( $obj->foo,     24, "accessing foo returns changed value" );
     is( $obj->baz(42), 42, "changing baz returns new value" );
-    is( $obj->baz, 42, "accessing baz returns changed value" );
+    is( $obj->baz,     42, "accessing baz returns changed value" );
 };
 
 subtest "exceptions" => sub {
@@ -67,7 +67,6 @@ subtest "exceptions" => sub {
     );
 
 };
-
 
 done_testing;
 # COPYRIGHT
