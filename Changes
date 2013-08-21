@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.004     2013-08-21 16:38:01 America/New_York
+
     [CHANGED]
 
     - Base class is now Class::Tiny::Object; Class::Tiny is now only the
