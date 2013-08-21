@@ -14,6 +14,13 @@ subtest "attribute set as list" => sub {
     is( $obj->bar, 23, "bar is set" );
 };
 
+subtest "hiding constructor argument" => sub {
+    my $obj = new_ok( "Delta", [ foo => 42, bar => 23, hide_me => 1 ] );
+    is( $obj->foo, 42, "foo is set" );
+    is( $obj->bar, 23, "bar is set" );
+    is( $obj->{hide_me}, 1, "hidden constructor argument still in object" );
+};
+
 subtest "destructor" => sub {
     my @objs = map { new_ok( "Delta", [ foo => 42, bar => 23 ] ) } 1 .. 3;
     is( $Delta::counter, 3, "BUILD incremented counter" );

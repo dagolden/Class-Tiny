@@ -67,23 +67,23 @@ sub new {
         Carp::croak("$class->new() got an odd number of elements");
     }
 
-    # unknown attributes are fatal
-    my @bad;
+    # create object and invoke BUILD
+    my $self = bless {%$args}, $class;
     my @search = @{ mro::get_linear_isa($class) };
+    for my $s ( reverse @search ) {
+        no strict 'refs';
+        my $builder = *{ $s . "::BUILD" }{CODE};
+        $self->$builder($args) if defined $builder;
+    }
+
+    # unknown attributes still in $args are fatal
+    my @bad;
     for my $k ( keys %$args ) {
         push @bad, $k
           unless grep { exists $CLASS_ATTRIBUTES{$_}{$k} } @search;
     }
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
-    }
-
-    # create object and invoke BUILD
-    my $self = bless {%$args}, $class;
-    for my $s ( reverse @search ) {
-        no strict 'refs';
-        my $builder = *{ $s . "::BUILD" }{CODE};
-        $self->$builder($args) if defined $builder;
     }
 
     return $self;
@@ -262,6 +262,9 @@ If a reference is passed as a single argument, it must be able to be
 dereferenced as a hash or an exception is thrown.  A shallow copy is made of
 the reference provided.
 
+Unknown arguments will result in a fatal exception, but see L</BUILD> for how
+to avoid this if desired.
+
 =head2 BUILD
 
 If your class or any superclass defines a C<BUILD> method, it will be called
@@ -275,6 +278,29 @@ is ignored.  Use C<BUILD> for validation or setting default values.
         my ($self, $args) = @_;
         $self->foo(42) unless defined $self->foo;
         croak "Foo must be non-negative" if $self->foo < 0;
+    }
+
+If you want to hide a non-attribute constructor argument from validation,
+delete it from the passed-in argument hash reference.
+
+    sub BUILD {
+        my ($self, $args) = @_;
+
+        if ( delete $args->{do_something_special} ) {
+            ...
+        }
+    }
+
+The argument reference is a copy, so deleting elements won't affect data in the
+object. You have to delete it from both if that's what you want.
+
+    sub BUILD {
+        my ($self, $args) = @_;
+
+        if ( delete $args->{do_something_special} ) {
+            delete $self->{do_something_special};
+            ...
+        }
     }
 
 =head2 DEMOLISH
@@ -300,6 +326,5 @@ method.
     # @attrs contains qw/name ssn/
 
 =cut
-
 
 # vim: ts=4 sts=4 sw=4 et:
