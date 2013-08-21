@@ -132,7 +132,7 @@ sub DESTROY {
 
 1;
 
-=for Pod::Coverage new get_all_attributes_for
+=for Pod::Coverage new get_all_attributes_for prepare_class create_attributes
 
 =head1 SYNOPSIS
 
@@ -179,8 +179,9 @@ code.  Here is a list of features:
 * superclass provides a C<DESTROY> method
 * C<DESTROY> calls C<DEMOLISH> for each class from child to parent
 
-It uses no non-core modules (except on Perls older than 5.10, where it requires
-L<MRO::Compat> from CPAN).
+It uses no non-core modules for any recent Perl. On Perls older than v5.10 it
+requires L<MRO::Compat>. On Perls older than v5.14, it requires
+L<Devel::GlobalDestruction>.
 
 =head2 Why this instead of Object::Tiny or Class::Accessor or something else?
 
@@ -277,7 +278,7 @@ the reference provided.
 In order to help catch typos in constructor arguments, any argument that it is
 not also a valid method (e.g. an accessor or other method) will result in a
 fatal exception.  This is not perfect, but should catch typical transposition
-typos. Also see L</BUILD> for how to explictly hide non-attribute, non-method
+typos. Also see L</BUILD> for how to explicitly hide non-attribute, non-method
 arguments if desired.
 
 =head2 BUILD
