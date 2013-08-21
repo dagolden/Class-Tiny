@@ -41,7 +41,7 @@ In F<example.pl>:
 
 =head1 DESCRIPTION
 
-This module offers a minimalist class construction kit in under 100 lines of
+This module offers a minimalist class construction kit in around 100 lines of
 code.  Here is a list of features:
 
 =over 4
