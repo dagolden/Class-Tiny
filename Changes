@@ -2,6 +2,30 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [CHANGED]
+
+    - Base class is now Class::Tiny::Object; Class::Tiny is now only the
+      class builder
+
+    - BUILD and DEMOLISH now have Moo(se) like semantics: BUILD gets
+      original constructor arguments. DEMOLISH is now passed a global
+      destruction flag (requires Devel::GlobalDestruction on Perls before
+      v5.14)
+
+    - Constructor argument validation now happens after BUILD.
+
+    - Constructor argument validation has been softened to a heuristic:
+      argument names must match a method name
+
+    [ADDED]
+
+    - added introspection method: get_all_attributes_for( $class)
+
+    [INTERNAL]
+
+    - Refactored import() for easier subclassing of Class::Tiny should
+      anyone be crazy enough to do so
+
 0.003     2013-08-19 19:43:36 America/New_York
 
     [FIXED]
