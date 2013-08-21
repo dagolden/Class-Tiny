@@ -102,27 +102,22 @@ sub new {
 }
 
 # Adapted from Moo and its dependencies
-
-BEGIN {
-    if ( defined ${^GLOBAL_PHASE} ) {
-        *_in_global_destruction = sub { return ${^GLOBAL_PHASE} eq 'DESTRUCT' }
-    }
-    else {
-        require Devel::GlobalDestruction;
-        *_in_global_destruction = \&Devel::GlobalDestruction::in_global_destrucution;
-    }
-}
+require Devel::GlobalDestruction unless defined ${^GLOBAL_PHASE};
 
 sub DESTROY {
     my $self = shift;
-
+    my $in_global_destruction =
+      defined ${^GLOBAL_PHASE}
+      ? ${^GLOBAL_PHASE} eq 'DESTRUCT'
+      : Devel::GlobalDestruction::in_global_destruction();
     for my $s ( @{ mro::get_linear_isa( ref $self ) } ) {
         no strict 'refs';
         my $demolisher = *{ $s . "::DEMOLISH" }{CODE};
-        my $e          = do {
+        next unless $demolisher;
+        my $e = do {
             local $?;
             local $@;
-            eval { $self->$demolisher( _in_global_destruction() ) if defined $demolisher };
+            eval { $self->$demolisher($in_global_destruction) };
             $@;
         };
         no warnings 'misc'; # avoid (in cleanup) warnings
