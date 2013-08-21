@@ -144,16 +144,16 @@ loading Class::Tiny:
 By declaring C<id> also with Class::Tiny, you include it in the list
 of allowed constructor parameters.
 
-=head2 Class::Tiny is your base class
+=head2 Class::Tiny::Object is your base class
 
-If your class B<does not> already inherit from some class, then Class::Tiny
-will be added to your C<@ISA> to provide C<new> and C<DESTROY>.  (The
-superclass C<import> method will silently do nothing for subclasses.)
+If your class B<does not> already inherit from some class, then
+Class::Tiny::Object will be added to your C<@ISA> to provide C<new> and
+C<DESTROY>.
 
 If your class B<does> inherit from something, then no additional inheritance is
-set up.  If the parent subclasses Class::Tiny, then all is well.  If not, then
-you'll get accessors set up but no constructor or destructor. Don't do that
-unless you really have a special need for it.
+set up.  If the parent subclasses Class::Tiny::Object, then all is well.  If
+not, then you'll get accessors set up but no constructor or destructor. Don't
+do that unless you really have a special need for it.
 
 Define subclasses as normal.  It's best to define them with L<base>, L<parent>
 or L<superclass> before defining attributes with Class::Tiny so the C<@ISA>
@@ -167,8 +167,8 @@ array is already populated at compile-time:
 
 =head2 Object construction
 
-If your class inherits from Class::Tiny (as it should if you followed the
-advice above), it provides the C<new> constructor for you.
+If your class inherits from Class::Tiny::Object (as it should if you followed
+the advice above), it provides the C<new> constructor for you.
 
 Objects can be created with attributes given as a hash reference or as a list
 of key/value pairs:
