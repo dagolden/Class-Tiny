@@ -35,20 +35,35 @@ sub prepare_class {
 # adapted from Object::Tiny and Object::Tiny::RW
 sub create_attributes {
     no strict 'refs';
-    my ( $class, $pkg, @attr ) = @_;
-    @attr = grep {
+    my ( $class, $pkg, @spec ) = @_;
+    my %defaults = map { ref $_ eq 'HASH' ? %$_ : ( $_ => undef ) } @spec;
+    my @attr = grep {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
-    } @attr;
-    $CLASS_ATTRIBUTES{$pkg}{$_} = undef for @attr;
+    } keys %defaults;
+    $CLASS_ATTRIBUTES{$pkg}{$_} = $defaults{$_} for @attr;
     #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
-      "package $pkg;",
+      "package $pkg;\n",
       map {
-        "sub $_ { return \@_ == 1 ? \$_[0]->{$_} : (\$_[0]->{$_} = \$_[1]) }\n"
+      <<CODE
+        sub $_ {
+            if ( \@_ == 1 ) {
+                if ( !exists \$_[0]{$_} && defined \$CLASS_ATTRIBUTES{'$pkg'}{$_} ) {
+                    \$_[0]{$_} = ref \$CLASS_ATTRIBUTES{'$pkg'}{$_} eq 'CODE' 
+                        ? \$CLASS_ATTRIBUTES{'$pkg'}{$_}->(\$_[0])
+                        : \$CLASS_ATTRIBUTES{'$pkg'}{$_};
+                }
+                return \$_[0]{$_};
+            }
+            else {
+                return \$_[0]{$_} = \$_[1];
+            }
+        }
+CODE
       } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
     #>>>
-    Carp::croak("Failed to generate attributes for $pkg: @attr") if $@;
+    Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
     return;
 }
 
@@ -166,6 +181,7 @@ code.  Here is a list of features:
 =for :list
 * defines attributes via import arguments
 * generates read-write accessors
+* supports lazy attribute defaults
 * supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
@@ -210,7 +226,7 @@ Define attributes as a list of import arguments:
         weight
     );
 
-For each item, a read-write accessor is created unless a subroutine of that
+For each attribute, a read-write accessor is created unless a subroutine of that
 name already exists:
 
     $obj->name;               # getter
@@ -218,6 +234,19 @@ name already exists:
 
 Attribute names must be valid subroutine identifiers or an exception will
 be thrown.
+
+You can specify lazy defaults by defining attributes with a hash reference.
+Keys define attribute names and values are constants or code references that
+will be evaluated when the attribute is first accessed if no value has been
+set.  The object is passed as an argument to a code reference.
+
+    package Foo::WithDefaults;
+
+    use Class::Tiny qw/name id/, {
+        title     => 'Peon',
+        skills    => sub { [] },
+        hire_date => sub { $_[0]->_build_hire_date }, 
+    };
 
 To make your own custom accessors, just pre-declare the method name before
 loading Class::Tiny:
@@ -230,8 +259,9 @@ loading Class::Tiny:
 
     sub id { ... }
 
-By declaring C<id> also with Class::Tiny, you include it in the list
-of allowed constructor parameters.
+By declaring C<id> also with Class::Tiny, you include it in the list of known
+attributes for introspection.  Default values will not be set for custom
+accessors unless you handle that yourself.
 
 =head2 Class::Tiny::Object is your base class
 
