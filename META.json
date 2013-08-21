@@ -88,8 +88,9 @@
    "x_authority" : "cpan:DAGOLDEN",
    "x_contributors" : [
       "Karen Etheridge <ether@cpan.org>",
+      "Matt S Trout <mstrout@cpan.org>",
       "Olivier Mengu\u00e9 <dolmen@cpan.org>",
-      "Toby Inkster <mail@tobyinkster.co.uk>"
+      "Toby Inkster <inkster@cpan.org>"
    ]
 }
 

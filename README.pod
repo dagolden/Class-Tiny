@@ -286,11 +286,15 @@ Karen Etheridge <ether@cpan.org>
 
 =item *
 
+Matt S Trout <mstrout@cpan.org>
+
+=item *
+
 Olivier Mengué <dolmen@cpan.org>
 
 =item *
 
-Toby Inkster <mail@tobyinkster.co.uk>
+Toby Inkster <inkster@cpan.org>
 
 =back
 
