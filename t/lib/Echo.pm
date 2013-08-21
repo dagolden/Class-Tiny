@@ -17,4 +17,6 @@ sub DEMOLISH {
     delete $self->{baz}; # or else Delta::DEMOLISH dies
 }
 
+sub a_method { 1 }
+
 1;

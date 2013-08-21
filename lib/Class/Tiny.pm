@@ -39,6 +39,8 @@ sub import {
     return 1;
 }
 
+# XXX do we need to track attributes at all anymore now that we use the
+# heuristic for validation?  Or is it still useful for introspection?
 sub get_all_attributes_for {
     my ( $class, $pkg ) = @_;
     return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
@@ -79,8 +81,7 @@ sub new {
     # unknown attributes still in $args are fatal
     my @bad;
     for my $k ( keys %$args ) {
-        push @bad, $k
-          unless grep { exists $CLASS_ATTRIBUTES{$_}{$k} } @search;
+        push( @bad, $k ) unless $self->can($k); # a heuristic to catch typos
     }
     if (@bad) {
         Carp::croak("Invalid attributes for $class: @bad");
@@ -162,7 +163,7 @@ code.  Here is a list of features:
 * supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
-* C<new> throws an error for unknown attributes
+* C<new> has heuristics to catch constructor attribute typos
 * C<new> calls C<BUILD> for each class from parent to child
 * superclass provides a C<DESTROY> method
 * C<DESTROY> calls C<DEMOLISH> for each class from child to parent
@@ -262,8 +263,11 @@ If a reference is passed as a single argument, it must be able to be
 dereferenced as a hash or an exception is thrown.  A shallow copy is made of
 the reference provided.
 
-Unknown arguments will result in a fatal exception, but see L</BUILD> for how
-to avoid this if desired.
+In order to help catch typos in constructor arguments, any argument that it is
+not also a valid method (e.g. an accessor or other method) will result in a
+fatal exception.  This is not perfect, but should catch typical transposition
+typos. Also see L</BUILD> for how to explictly hide non-attribute, non-method
+arguments if desired.
 
 =head2 BUILD
 
