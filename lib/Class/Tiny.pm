@@ -327,7 +327,7 @@ values and errors are ignored.
         $self->cleanup();
     }
 
-=head2 Introspection
+=head2 Introspection and internals
 
 You can retrieve an unsorted list of valid attributes known to Class::Tiny
 for a class and its superclasses with the C<get_all_attributes_for> class
@@ -335,6 +335,11 @@ method.
 
     my @attrs = Class::Tiny->get_all_attributes_for("Employee");
     # @attrs contains qw/name ssn/
+
+The C<import> method uses two class methods, C<prepare_class> and
+C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone
+attempting to extend Class::Tiny itself should use these instead of mocking up
+a call to C<import>.
 
 =cut
 
