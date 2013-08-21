@@ -17,17 +17,30 @@ else {
 
 my %CLASS_ATTRIBUTES;
 
-# adapted from Object::Tiny and Object::Tiny::RW
 sub import {
-    no strict 'refs';
     my $class = shift;
     my $pkg   = caller;
-    my @attr  = grep {
+    $class->prepare_class($pkg);
+    $class->create_attributes( $pkg, @_ );
+    return;
+}
+
+sub prepare_class {
+    no strict 'refs';
+    my ( $class, $pkg ) = @_;
+    @{"${pkg}::ISA"} = "Class::Tiny::Object" unless @{"${pkg}::ISA"};
+    return;
+}
+
+# adapted from Object::Tiny and Object::Tiny::RW
+sub create_attributes {
+    no strict 'refs';
+    my ( $class, $pkg, @attr ) = @_;
+    @attr = grep {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
-    } @_;
+    } @attr;
     $CLASS_ATTRIBUTES{$pkg}{$_} = undef for @attr;
-    @{"${pkg}::ISA"} = "Class::Tiny::Object" unless @{"${pkg}::ISA"};
     #<<< No perltidy
     eval join "\n", ## no critic: intentionally eval'ing subs here
       "package $pkg;",
@@ -35,12 +48,10 @@ sub import {
         "sub $_ { return \@_ == 1 ? \$_[0]->{$_} : (\$_[0]->{$_} = \$_[1]) }\n"
       } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
     #>>>
-    Carp::croak("Failed to generate $pkg") if $@;
-    return 1;
+    Carp::croak("Failed to generate attributes for $pkg: @attr") if $@;
+    return;
 }
 
-# XXX do we need to track attributes at all anymore now that we use the
-# heuristic for validation?  Or is it still useful for introspection?
 sub get_all_attributes_for {
     my ( $class, $pkg ) = @_;
     return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
