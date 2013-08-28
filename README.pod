@@ -8,7 +8,7 @@ Class::Tiny - Minimalist class construction
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -25,7 +25,9 @@ In F<Employee.pm>:
   package Employee;
   use parent 'Person';
 
-  use Class::Tiny qw( ssn );
+  use Class::Tiny qw( ssn ), {
+    timestamp => sub { time }   # attribute with default
+  };
 
   1;
 
@@ -53,6 +55,10 @@ defines attributes via import arguments
 =item *
 
 generates read-write accessors
+
+=item *
+
+supports lazy attribute defaults
 
 =item *
 
@@ -105,6 +111,13 @@ I looked for something like it on CPAN, but after checking a dozen class
 creators I realized I could implement it exactly how I wanted faster than I
 could search CPAN for something merely sufficient.
 
+=head2 Why this instead of Moose or Moo?
+
+L<Moose> and L<Moo> are wonderful, but have a lot of dependencies.  This
+doesn't, which makes it great for core or fatpacking.  That said, Class::Tiny
+tries to follow similar conventions for things like C<BUILD> and C<DEMOLISH>
+for some minimal interoperabilty.
+
 =for Pod::Coverage new get_all_attributes_for prepare_class create_attributes
 
 =head1 USAGE
@@ -122,7 +135,7 @@ Define attributes as a list of import arguments:
         weight
     );
 
-For each item, a read-write accessor is created unless a subroutine of that
+For each attribute, a read-write accessor is created unless a subroutine of that
 name already exists:
 
     $obj->name;               # getter
@@ -130,6 +143,19 @@ name already exists:
 
 Attribute names must be valid subroutine identifiers or an exception will
 be thrown.
+
+You can specify lazy defaults by defining attributes with a hash reference.
+Keys define attribute names and values are constants or code references that
+will be evaluated when the attribute is first accessed if no value has been
+set.  The object is passed as an argument to a code reference.
+
+    package Foo::WithDefaults;
+
+    use Class::Tiny qw/name id/, {
+        title     => 'Peon',
+        skills    => sub { [] },
+        hire_date => sub { $_[0]->_build_hire_date }, 
+    };
 
 To make your own custom accessors, just pre-declare the method name before
 loading Class::Tiny:
@@ -142,8 +168,9 @@ loading Class::Tiny:
 
     sub id { ... }
 
-By declaring C<id> also with Class::Tiny, you include it in the list
-of allowed constructor parameters.
+By declaring C<id> also with Class::Tiny, you include it in the list of known
+attributes for introspection.  Default values will not be set for custom
+accessors unless you handle that yourself.
 
 =head2 Class::Tiny::Object is your base class
 

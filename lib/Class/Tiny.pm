@@ -159,7 +159,9 @@ In F<Employee.pm>:
   package Employee;
   use parent 'Person';
 
-  use Class::Tiny qw( ssn );
+  use Class::Tiny qw( ssn ), {
+    timestamp => sub { time }   # attribute with default
+  };
 
   1;
 
@@ -210,6 +212,13 @@ API.  (The only API is a list of attributes!)
 I looked for something like it on CPAN, but after checking a dozen class
 creators I realized I could implement it exactly how I wanted faster than I
 could search CPAN for something merely sufficient.
+
+=head2 Why this instead of Moose or Moo?
+
+L<Moose> and L<Moo> are wonderful, but have a lot of dependencies.  This
+doesn't, which makes it great for core or fatpacking.  That said, Class::Tiny
+tries to follow similar conventions for things like C<BUILD> and C<DEMOLISH>
+for some minimal interoperabilty.
 
 =head1 USAGE
 
