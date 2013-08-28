@@ -218,7 +218,7 @@ could search CPAN for something merely sufficient.
 L<Moose> and L<Moo> are wonderful, but have a lot of dependencies.  This
 doesn't, which makes it great for core or fatpacking.  That said, Class::Tiny
 tries to follow similar conventions for things like C<BUILD> and C<DEMOLISH>
-for some minimal interoperabilty.
+for some minimal interoperability.
 
 =head1 USAGE
 
