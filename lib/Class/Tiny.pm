@@ -1,5 +1,6 @@
 use 5.008001;
 use strict;
+no strict 'refs';
 use warnings;
 
 package Class::Tiny;
@@ -8,12 +9,8 @@ package Class::Tiny;
 
 use Carp ();
 
-if ( $] >= 5.010 ) {
-    require "mro.pm"; ## no critic: hack to hide from min version & prereq scanners
-}
-else {
-    require MRO::Compat;
-}
+# load as .pm to hide from min version scanners
+require( $] >= 5.010 ? "mro.pm" : "MRO/Compat.pm" ); ## no critic:
 
 my %CLASS_ATTRIBUTES;
 
@@ -22,19 +19,15 @@ sub import {
     my $pkg   = caller;
     $class->prepare_class($pkg);
     $class->create_attributes( $pkg, @_ );
-    return;
 }
 
 sub prepare_class {
-    no strict 'refs';
     my ( $class, $pkg ) = @_;
     @{"${pkg}::ISA"} = "Class::Tiny::Object" unless @{"${pkg}::ISA"};
-    return;
 }
 
 # adapted from Object::Tiny and Object::Tiny::RW
 sub create_attributes {
-    no strict 'refs';
     my ( $class, $pkg, @spec ) = @_;
     my %defaults = map { ref $_ eq 'HASH' ? %$_ : ( $_ => undef ) } @spec;
     my @attr = grep {
@@ -64,7 +57,6 @@ CODE
       } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
     #>>>
     Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
-    return;
 }
 
 sub get_all_attributes_for {
@@ -83,9 +75,7 @@ sub new {
     my $args;
     if ( @_ == 1 && ref $_[0] ) {
         my %copy = eval { %{ $_[0] } }; # try shallow copy
-        if ($@) {
-            Carp::croak("Argument to $class->new() could not be dereferenced as a hash");
-        }
+        Carp::croak("Argument to $class->new() could not be dereferenced as a hash") if $@;
         $args = \%copy;
     }
     elsif ( @_ % 2 == 0 ) {
@@ -99,7 +89,6 @@ sub new {
     my $self = bless {%$args}, $class;
     my @search = @{ mro::get_linear_isa($class) };
     for my $s ( reverse @search ) {
-        no strict 'refs';
         my $builder = *{ $s . "::BUILD" }{CODE};
         $self->$builder($args) if defined $builder;
     }
@@ -109,9 +98,7 @@ sub new {
     for my $k ( keys %$args ) {
         push( @bad, $k ) unless $self->can($k); # a heuristic to catch typos
     }
-    if (@bad) {
-        Carp::croak("Invalid attributes for $class: @bad");
-    }
+    Carp::croak("Invalid attributes for $class: @bad") if @bad;
 
     return $self;
 }
@@ -126,12 +113,10 @@ sub DESTROY {
       ? ${^GLOBAL_PHASE} eq 'DESTRUCT'
       : Devel::GlobalDestruction::in_global_destruction();
     for my $s ( @{ mro::get_linear_isa( ref $self ) } ) {
-        no strict 'refs';
         my $demolisher = *{ $s . "::DEMOLISH" }{CODE};
         next unless $demolisher;
         my $e = do {
-            local $?;
-            local $@;
+            local ( $?, $@ );
             eval { $self->$demolisher($in_global_destruction) };
             $@;
         };
