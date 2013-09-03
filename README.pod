@@ -321,7 +321,7 @@ Olivier Mengué <dolmen@cpan.org>
 
 =item *
 
-Toby Inkster <inkster@cpan.org>
+Toby Inkster <tobyink@cpan.org>
 
 =back
 
