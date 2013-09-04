@@ -118,7 +118,8 @@ doesn't, which makes it great for core or fatpacking.  That said, Class::Tiny
 tries to follow similar conventions for things like C<BUILD> and C<DEMOLISH>
 for some minimal interoperability.
 
-=for Pod::Coverage new get_all_attributes_for prepare_class create_attributes
+=for Pod::Coverage new get_all_attributes_for get_all_attribute_defaults_for
+prepare_class create_attributes
 
 =head1 USAGE
 
@@ -273,7 +274,18 @@ for a class and its superclasses with the C<get_all_attributes_for> class
 method.
 
     my @attrs = Class::Tiny->get_all_attributes_for("Employee");
-    # @attrs contains qw/name ssn/
+    # returns qw/name ssn timestamp/
+
+Likewise, a hash reference of all valid attributes and default values (or code
+references) may be retrieved with the C<get_all_attribute_defaults_for> class
+method.  Any attributes without a default will be C<undef>.
+
+    my $def = Class::Tiny->get_all_attribute_defaults_for("Employee");
+    # returns {
+    #   name => undef,
+    #   ssn => undef
+    #   timestamp => $coderef
+    # }
 
 The C<import> method uses two class methods, C<prepare_class> and
 C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone

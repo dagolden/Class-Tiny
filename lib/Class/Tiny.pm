@@ -64,6 +64,17 @@ sub get_all_attributes_for {
     return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
 }
 
+sub get_all_attribute_defaults_for {
+    my ( $class, $pkg ) = @_;
+    my $defaults = {};
+    for my $p ( @{ mro::get_linear_isa($pkg) } ) {
+        while ( my ( $k, $v ) = each %{ $CLASS_ATTRIBUTES{$p} || {} } ) {
+            $defaults->{$k} = $v;
+        }
+    }
+    return $defaults;
+}
+
 package Class::Tiny::Object;
 # ABSTRACT: Base class for classes built with Class::Tiny
 # VERSION
@@ -127,7 +138,9 @@ sub DESTROY {
 
 1;
 
-=for Pod::Coverage new get_all_attributes_for prepare_class create_attributes
+=for Pod::Coverage
+new get_all_attributes_for get_all_attribute_defaults_for
+prepare_class create_attributes
 
 =head1 SYNOPSIS
 
@@ -358,7 +371,18 @@ for a class and its superclasses with the C<get_all_attributes_for> class
 method.
 
     my @attrs = Class::Tiny->get_all_attributes_for("Employee");
-    # @attrs contains qw/name ssn/
+    # returns qw/name ssn timestamp/
+
+Likewise, a hash reference of all valid attributes and default values (or code
+references) may be retrieved with the C<get_all_attribute_defaults_for> class
+method.  Any attributes without a default will be C<undef>.
+
+    my $def = Class::Tiny->get_all_attribute_defaults_for("Employee");
+    # returns {
+    #   name => undef,
+    #   ssn => undef
+    #   timestamp => $coderef
+    # }
 
 The C<import> method uses two class methods, C<prepare_class> and
 C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone
