@@ -10,6 +10,8 @@ Revision history for Class-Tiny
 
     - Fixed TOBYINK email address for contributors list
 
+    - Revised rationale for why Class::Tiny vs other modules
+
 0.005     2013-08-28 11:51:37 America/New_York
 
     [ADDED]

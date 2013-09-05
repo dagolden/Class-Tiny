@@ -94,30 +94,6 @@ It uses no non-core modules for any recent Perl. On Perls older than v5.10 it
 requires L<MRO::Compat>. On Perls older than v5.14, it requires
 L<Devel::GlobalDestruction>.
 
-=head2 Why this instead of Object::Tiny or Class::Accessor or something else?
-
-I wanted something so simple that it could potentially be used by core Perl
-modules I help maintain (or hope to write), most of which either use
-L<Class::Struct> or roll-their-own OO framework each time.
-
-L<Object::Tiny> and L<Object::Tiny::RW> were close to what I wanted, but
-lacking some features I deemed necessary, and their maintainers have an even
-more strict philosophy against feature creep than I have.
-
-Compared to everything else, this is smaller in implementation and simpler in
-API.  (The only API is a list of attributes!)
-
-I looked for something like it on CPAN, but after checking a dozen class
-creators I realized I could implement it exactly how I wanted faster than I
-could search CPAN for something merely sufficient.
-
-=head2 Why this instead of Moose or Moo?
-
-L<Moose> and L<Moo> are wonderful, but have a lot of dependencies.  This
-doesn't, which makes it great for core or fatpacking.  That said, Class::Tiny
-tries to follow similar conventions for things like C<BUILD> and C<DEMOLISH>
-for some minimal interoperability.
-
 =for Pod::Coverage new get_all_attributes_for get_all_attribute_defaults_for
 prepare_class create_attributes
 
@@ -291,6 +267,36 @@ The C<import> method uses two class methods, C<prepare_class> and
 C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone
 attempting to extend Class::Tiny itself should use these instead of mocking up
 a call to C<import>.
+
+=head1 RATIONALE
+
+=head2 Why this instead of Object::Tiny or Class::Accessor or something else?
+
+I wanted something so simple that it could potentially be used by core Perl
+modules I help maintain (or hope to write), most of which either use
+L<Class::Struct> or roll-their-own OO framework each time.
+
+L<Object::Tiny> and L<Object::Tiny::RW> were close to what I wanted, but
+lacking some features I deemed necessary, and their maintainers have an even
+more strict philosophy against feature creep than I have.
+
+I looked for something like it on CPAN, but after checking a dozen class
+creators I realized I could implement it exactly how I wanted faster than I
+could search CPAN for something merely sufficient.  Compared to everything
+else, this is smaller in implementation and simpler in API.
+
+=head2 Why this instead of Moose or Moo?
+
+L<Moose> is slow to start up and has about 30 non-core dependencies including
+XS modules.  L<Moo> is faster and lighter at about 10 non-core (but pure Perl)
+dependencies.  Class::Tiny has B<zero> non-core dependencies for Perls in the
+L<support window|perlpolicy>.
+
+Class::Tiny has less code, less complexity and no learning curve. If you don't
+need or can't afford what Moo or Moose offer, this is a intended to be a
+reasonable fallback.  That said, Class::Tiny offers Moose-like conventions for
+things like C<BUILD> and C<DEMOLISH> for some minimal interoperability and an
+easier upgrade path.
 
 =for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 
