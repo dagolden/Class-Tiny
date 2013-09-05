@@ -61,7 +61,9 @@ CODE
 
 sub get_all_attributes_for {
     my ( $class, $pkg ) = @_;
-    my %attr = map { $_ => undef } map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
+    my %attr =
+      map { $_ => undef }
+      map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
     return keys %attr;
 }
 
