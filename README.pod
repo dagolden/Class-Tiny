@@ -287,17 +287,17 @@ else, this is smaller in implementation and simpler in API.
 
 =head2 Why this instead of Moose or Moo?
 
-L<Moose> and L<Moo> are both excellent OO frameworks.  L<Moose> offers a
-powerful meta-object protocol, but is slow to start up and has about 30
-non-core dependencies including XS modules.  L<Moo> has a simpler meta-object
-protocol and is faster and lighter at about 10 non-core (but pure Perl)
-dependencies.
+L<Moose> and L<Moo> are both excellent OO frameworks.  Moose offers a powerful
+meta-object protocol (MOP), but is slow to start up and has about 30 non-core
+dependencies including XS modules.  Moo is faster to start up and has about 10
+pure Perl dependencies but provides no true MOP, relying instead on its ability
+to transparently upgrade Moo to Moose when Moose's full feature set is
+required.
 
-By contrast, Class::Tiny has no meta-object protocol, minimal class
-introspection, and has B<zero> non-core dependencies for Perls in the L<support
-window|perlpolicy>.  It has far less code, less complexity and no learning
-curve. If you don't need or can't afford what Moo or Moose offer, this is a
-intended to be a reasonable fallback.
+By contrast, Class::Tiny has no MOP and has B<zero> non-core dependencies for
+Perls in the L<support window|perlpolicy>.  It has far less code, less
+complexity and no learning curve. If you don't need or can't afford what Moo or
+Moose offer, this is a intended to be a reasonable fallback.
 
 That said, Class::Tiny offers Moose-like conventions for things like C<BUILD>
 and C<DEMOLISH> for some minimal interoperability and an easier upgrade path.
