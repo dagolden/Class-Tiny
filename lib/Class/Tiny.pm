@@ -18,7 +18,7 @@ sub import {
     my $class = shift;
     my $pkg   = caller;
     $class->prepare_class($pkg);
-    $class->create_attributes( $pkg, @_ );
+    $class->create_attributes( $pkg, @_ ) if @_;
 }
 
 sub prepare_class {
