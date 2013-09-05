@@ -61,13 +61,14 @@ CODE
 
 sub get_all_attributes_for {
     my ( $class, $pkg ) = @_;
-    return map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
+    my %attr = map { $_ => undef } map { keys %{ $CLASS_ATTRIBUTES{$_} || {} } } @{ mro::get_linear_isa($pkg) };
+    return keys %attr;
 }
 
 sub get_all_attribute_defaults_for {
     my ( $class, $pkg ) = @_;
     my $defaults = {};
-    for my $p ( @{ mro::get_linear_isa($pkg) } ) {
+    for my $p ( reverse @{ mro::get_linear_isa($pkg) } ) {
         while ( my ( $k, $v ) = each %{ $CLASS_ATTRIBUTES{$p} || {} } ) {
             $defaults->{$k} = $v;
         }
