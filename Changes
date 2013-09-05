@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.006     2013-09-05 11:56:48 America/New_York
+
     [ADDED]
 
     - added introspection method: get_all_attribute_defaults_for($class)
