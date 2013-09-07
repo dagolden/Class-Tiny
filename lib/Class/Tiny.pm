@@ -376,6 +376,11 @@ C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone
 attempting to extend Class::Tiny itself should use these instead of mocking up
 a call to C<import>.
 
+When the first object is created, linearized C<@ISA> and various subroutines
+references are cached for speed.  Ensure that all inheritance and methods are
+in place before creating objects. (You don't want to be changing that once you
+create objects anyway, right?)
+
 =head1 RATIONALE
 
 =head2 Why this instead of Object::Tiny or Class::Accessor or something else?
