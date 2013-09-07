@@ -79,6 +79,8 @@ package Class::Tiny::Object;
 # ABSTRACT: Base class for classes built with Class::Tiny
 # VERSION
 
+my %can_cache;
+
 sub new {
     my $class = shift;
 
@@ -98,16 +100,20 @@ sub new {
 
     # create object and invoke BUILD
     my $self = bless {%$args}, $class;
-    my @search = @{ mro::get_linear_isa($class) };
-    for my $s ( reverse @search ) {
-        my $builder = *{ $s . "::BUILD" }{CODE};
-        $self->$builder($args) if defined $builder;
+    if ( @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object" ) {
+        $self->BUILD($args) if defined *{"$class\::BUILD"};
+    }
+    else {
+        for my $s ( reverse @{ mro::get_linear_isa($class) } ) {
+            &{ *{"$s\::BUILD"}{CODE} }( $self, $args ) if defined *{"$s\::BUILD"}{CODE};
+        }
     }
 
     # unknown attributes still in $args are fatal
     my @bad;
     for my $k ( keys %$args ) {
-        push( @bad, $k ) unless $self->can($k); # a heuristic to catch typos
+        push( @bad, $k )
+          unless $can_cache{$class}{$k} ||= $self->can($k); # a heuristic to catch typos
     }
     Carp::croak("Invalid attributes for $class: @bad") if @bad;
 
@@ -118,21 +124,35 @@ sub new {
 require Devel::GlobalDestruction unless defined ${^GLOBAL_PHASE};
 
 sub DESTROY {
-    my $self = shift;
+    my $self  = shift;
+    my $class = ref $self;
     my $in_global_destruction =
       defined ${^GLOBAL_PHASE}
       ? ${^GLOBAL_PHASE} eq 'DESTRUCT'
       : Devel::GlobalDestruction::in_global_destruction();
-    for my $s ( @{ mro::get_linear_isa( ref $self ) } ) {
-        my $demolisher = *{ $s . "::DEMOLISH" }{CODE};
-        next unless $demolisher;
-        my $e = do {
-            local ( $?, $@ );
-            eval { $self->$demolisher($in_global_destruction) };
-            $@;
-        };
-        no warnings 'misc'; # avoid (in cleanup) warnings
-        die $e if $e;       # rethrow
+    if ( @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object" ) {
+        if ( defined *{"$class\::DEMOLISH"} ) {
+            my $e = do {
+                local ( $?, $@ );
+                eval { $self->DEMOLISH($in_global_destruction) };
+                $@;
+            };
+            no warnings 'misc'; # avoid (in cleanup) warnings
+            die $e if $e;       # rethrow
+        }
+    }
+    else {
+        for my $s ( @{ mro::get_linear_isa($class) } ) {
+            my $demolisher = *{"$s\::DEMOLISH"}{CODE};
+            next unless $demolisher;
+            my $e = do {
+                local ( $?, $@ );
+                eval { $self->$demolisher($in_global_destruction) };
+                $@;
+            };
+            no warnings 'misc'; # avoid (in cleanup) warnings
+            die $e if $e;       # rethrow
+        }
     }
 }
 
