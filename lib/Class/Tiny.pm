@@ -52,7 +52,7 @@ sub _gen_accessor {
     }
     $sub .= "return \$_[0]{$name} } else { return \$_[0]{$name}=\$_[1] } }";
 
-    eval "package $pkg; $sub";
+    eval "package $pkg; $sub"; ## no critic
     Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
 }
 
