@@ -2,6 +2,11 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [OPTIMIZED]
+
+    - accessors without defaults are now much faster (comparable
+      to Class::Accessor::Fast)
+
 0.006     2013-09-05 11:56:48 America/New_York
 
     [ADDED]

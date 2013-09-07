@@ -35,27 +35,24 @@ sub create_attributes {
           or Carp::croak "Invalid accessor name '$_'"
     } keys %defaults;
     $CLASS_ATTRIBUTES{$pkg}{$_} = $defaults{$_} for @attr;
-    #<<< No perltidy
-    eval join "\n", ## no critic: intentionally eval'ing subs here
-      "package $pkg;\n",
-      map {
-      <<CODE
-        sub $_ {
-            if ( \@_ == 1 ) {
-                if ( !exists \$_[0]{$_} && defined \$CLASS_ATTRIBUTES{'$pkg'}{$_} ) {
-                    \$_[0]{$_} = ref \$CLASS_ATTRIBUTES{'$pkg'}{$_} eq 'CODE' 
-                        ? \$CLASS_ATTRIBUTES{'$pkg'}{$_}->(\$_[0])
-                        : \$CLASS_ATTRIBUTES{'$pkg'}{$_};
-                }
-                return \$_[0]{$_};
-            }
-            else {
-                return \$_[0]{$_} = \$_[1];
-            }
-        }
-CODE
-      } grep { ! *{"$pkg\::$_"}{CODE} } @attr;
-    #>>>
+    _gen_accessor( $pkg, $_ ) for grep { !*{"$pkg\::$_"}{CODE} } @attr;
+    Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
+}
+
+sub _gen_accessor {
+    my ( $pkg, $name ) = @_;
+    my $default = $CLASS_ATTRIBUTES{$pkg}{$name};
+
+    my $sub = "sub $name { if (\@_ == 1) {";
+    if ( defined $default && ref $default eq 'CODE' ) {
+        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default->(\$_[0]) }";
+    }
+    elsif ( defined $default ) {
+        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default }";
+    }
+    $sub .= "return \$_[0]{$name} } else { return \$_[0]{$name}=\$_[1] } }";
+
+    eval "package $pkg; $sub";
     Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
 }
 
