@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.007     2013-09-07 16:48:56 America/New_York
+
     [OPTIMIZED]
 
     - accessors without defaults are now much faster (comparable
