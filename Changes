@@ -2,6 +2,10 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - META.yml encoding problems
+
     [DOCUMENTED]
 
     - revised CONTRIBUTING
