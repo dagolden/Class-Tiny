@@ -2,6 +2,14 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [DOCUMENTED]
+
+    - revised CONTRIBUTING
+
+    [INTERNAL]
+
+    - refactored precaching
+
 0.007     2013-09-07 16:48:56 America/New_York
 
     [OPTIMIZED]
