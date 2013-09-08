@@ -79,13 +79,24 @@ package Class::Tiny::Object;
 # ABSTRACT: Base class for classes built with Class::Tiny
 # VERSION
 
-my %CAN_CACHE;
-my %LINEAR_ISA_CACHE;
-my %DEMOLISH_CACHE;
-my %BUILD_CACHE;
+my ( %LINEAR_ISA_CACHE, %BUILD_CACHE, %DEMOLISH_CACHE, %CAN_CACHE );
+
+sub _precache {
+    my ($class) = @_;
+    $LINEAR_ISA_CACHE{$class} =
+      @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object"
+      ? [$class]
+      : mro::get_linear_isa($class);
+    for my $s ( @{ $LINEAR_ISA_CACHE{$class} } ) {
+        $BUILD_CACHE{$s}    = *{"$s\::BUILD"}{CODE};
+        $DEMOLISH_CACHE{$s} = *{"$s\::DEMOLISH"}{CODE};
+    }
+    return $LINEAR_ISA_CACHE{$class};
+}
 
 sub new {
     my $class = shift;
+    my $linear_isa = $LINEAR_ISA_CACHE{$class} || $class->_precache;
 
     # handle hash ref or key/value arguments
     my $args;
@@ -103,14 +114,9 @@ sub new {
 
     # create object and invoke BUILD
     my $self = bless {%$args}, $class;
-    my $linear_isa = $LINEAR_ISA_CACHE{$class} ||=
-      @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object"
-      ? [$class]
-      : mro::get_linear_isa($class);
-
     for my $s ( reverse @$linear_isa ) {
-        my $builder = $BUILD_CACHE{$s} ||= *{"$s\::BUILD"}{CODE};
-        $builder->( $self, $args ) if $builder;
+        next unless my $builder = $BUILD_CACHE{$s};
+        $builder->( $self, $args );
     }
 
     # unknown attributes still in $args are fatal
@@ -135,8 +141,7 @@ sub DESTROY {
       ? ${^GLOBAL_PHASE} eq 'DESTRUCT'
       : Devel::GlobalDestruction::in_global_destruction();
     for my $s ( @{ $LINEAR_ISA_CACHE{$class} } ) {
-        my $demolisher = $DEMOLISH_CACHE{$s} ||= *{"$s\::DEMOLISH"}{CODE};
-        next unless $demolisher;
+        next unless my $demolisher = $DEMOLISH_CACHE{$s};
         my $e = do {
             local ( $?, $@ );
             eval { $demolisher->( $self, $in_global_destruction ) };
@@ -186,7 +191,7 @@ In F<example.pl>:
 
 =head1 DESCRIPTION
 
-This module offers a minimalist class construction kit in around 100 lines of
+This module offers a minimalist class construction kit in around 120 lines of
 code.  Here is a list of features:
 
 =for :list
