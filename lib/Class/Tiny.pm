@@ -81,7 +81,7 @@ package Class::Tiny::Object;
 
 my ( %LINEAR_ISA_CACHE, %BUILD_CACHE, %DEMOLISH_CACHE, %CAN_CACHE );
 
-sub _precache {
+my $_PRECACHE = sub {
     my ($class) = @_;
     $LINEAR_ISA_CACHE{$class} =
       @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object"
@@ -92,11 +92,11 @@ sub _precache {
         $DEMOLISH_CACHE{$s} = *{"$s\::DEMOLISH"}{CODE};
     }
     return $LINEAR_ISA_CACHE{$class};
-}
+};
 
 sub new {
     my $class = shift;
-    my $linear_isa = $LINEAR_ISA_CACHE{$class} || $class->_precache;
+    my $linear_isa = $LINEAR_ISA_CACHE{$class} || $_PRECACHE->($class);
 
     # handle hash ref or key/value arguments
     my $args;
