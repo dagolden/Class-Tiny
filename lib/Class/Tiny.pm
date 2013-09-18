@@ -2,6 +2,7 @@ use 5.008001;
 use strict;
 no strict 'refs';
 use warnings;
+no warnings 'once';
 
 package Class::Tiny;
 # ABSTRACT: Minimalist class construction

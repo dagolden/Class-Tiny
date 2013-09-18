@@ -2,6 +2,10 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - suppressed 'used only once' warnings (GH #9)
+
 0.009     2013-09-17 06:54:47 America/New_York
 
     [FIXED]
