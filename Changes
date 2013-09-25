@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.011     2013-09-25 11:08:07 America/New_York
+
     [FIXED]
 
     - compile test could hang on Windows
