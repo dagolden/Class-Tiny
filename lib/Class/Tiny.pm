@@ -208,6 +208,9 @@ code.  Here is a list of features:
 * superclass provides a C<DESTROY> method
 * C<DESTROY> calls C<DEMOLISH> for each class from child to parent
 
+Multiple-inheritance is possible, with superclass order determined via
+L<mro::get_linear_isa|mro/Functions>.
+
 It uses no non-core modules for any recent Perl. On Perls older than v5.10 it
 requires L<MRO::Compat>. On Perls older than v5.14, it requires
 L<Devel::GlobalDestruction>.
@@ -248,6 +251,10 @@ set.  The object is passed as an argument to a code reference.
         skills    => sub { [] },
         hire_date => sub { $_[0]->_build_hire_date }, 
     };
+
+When subclassing, if multiple accessors of the same name exist in different
+classes, any default (or lack of default) is determined by standard
+method resolution order.
 
 To make your own custom accessors, just pre-declare the method name before
 loading Class::Tiny:
