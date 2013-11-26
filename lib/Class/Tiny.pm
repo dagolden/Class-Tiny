@@ -249,7 +249,7 @@ set.  The object is passed as an argument to a code reference.
     use Class::Tiny qw/name id/, {
         title     => 'Peon',
         skills    => sub { [] },
-        hire_date => sub { $_[0]->_build_hire_date }, 
+        hire_date => sub { $_[0]->_build_hire_date },
     };
 
 When subclassing, if multiple accessors of the same name exist in different
@@ -407,10 +407,31 @@ L<Object::Tiny> and L<Object::Tiny::RW> were close to what I wanted, but
 lacking some features I deemed necessary, and their maintainers have an even
 more strict philosophy against feature creep than I have.
 
-I looked for something like it on CPAN, but after checking a dozen class
-creators I realized I could implement it exactly how I wanted faster than I
-could search CPAN for something merely sufficient.  Compared to everything
-else, this is smaller in implementation and simpler in API.
+I also considered L<Class::Accessor>, which has been around a long time and is
+heavily used, but it, too, lacked features I wanted and did things in ways I
+considered poor design.
+
+I looked for something else on CPAN, but after checking a dozen class creators
+I realized I could implement exactly what I wanted faster than I could search
+CPAN for something merely sufficient.
+
+In general, compared to most things on CPAN (other than Object::Tiny),
+Class::Tiny is smaller in implementation and simpler in API.
+
+Specifically, here is how Class::Tiny ("C::T") compares to Object::Tiny
+("O::T") and Class::Accessor ("C::A"):
+
+ FEATURE                            C::T    O::T      C::A
+ --------------------------------------------------------------
+ attributes defined via import      yes     yes       no
+ read/write accessors               yes     no        yes
+ lazy attribute defaults            yes     no        no
+ provides new                       yes     yes       yes
+ provides DESTROY                   yes     no        no
+ new takes either hashref or list   yes     no (list) no (hash)
+ new validates arguments            yes     no        no
+ Moo(se)-like BUILD/DEMOLISH        yes     no        no
+ no extraneous methods via @ISA     yes     yes       no
 
 =head2 Why this instead of Moose or Moo?
 
@@ -424,7 +445,7 @@ required.
 By contrast, Class::Tiny has no MOP and has B<zero> non-core dependencies for
 Perls in the L<support window|perlpolicy>.  It has far less code, less
 complexity and no learning curve. If you don't need or can't afford what Moo or
-Moose offer, this is a intended to be a reasonable fallback.
+Moose offer, this is intended to be a reasonable fallback.
 
 That said, Class::Tiny offers Moose-like conventions for things like C<BUILD>
 and C<DEMOLISH> for some minimal interoperability and an easier upgrade path.
