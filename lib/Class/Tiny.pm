@@ -89,6 +89,7 @@ my $_PRECACHE = sub {
       ? [$class]
       : mro::get_linear_isa($class);
     for my $s ( @{ $LINEAR_ISA_CACHE{$class} } ) {
+        no warnings 'once';
         $BUILD_CACHE{$s}    = *{"$s\::BUILD"}{CODE};
         $DEMOLISH_CACHE{$s} = *{"$s\::DEMOLISH"}{CODE};
     }
