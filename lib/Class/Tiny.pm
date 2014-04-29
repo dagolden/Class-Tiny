@@ -308,7 +308,7 @@ If a reference is passed as a single argument, it must be able to be
 dereferenced as a hash or an exception is thrown.  A shallow copy is made of
 the reference provided.
 
-In order to help catch typos in constructor arguments, any argument that it is
+In order to help catch typos in constructor arguments, any argument that is
 not also a valid method (e.g. an accessor or other method) will result in a
 fatal exception.  This is not perfect, but should catch typical transposition
 typos. Also see L</BUILD> for how to explicitly hide non-attribute, non-method
