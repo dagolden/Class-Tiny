@@ -17,8 +17,7 @@ before_install:
   - source perl-travis-helper/init
   - build-perl
   - perl -V
-  - build-dist
-  - cd $BUILD_DIR
 install:
-     - cpanm -n -q --skip-satisfied --installdeps .
-script: prove -lmr t
+  - cpan-install Test::More
+script: prove -l -r t
+# vim: ts=2 sts=2 sw=2 et:
