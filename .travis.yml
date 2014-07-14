@@ -9,14 +9,9 @@ perl:
   - "5.14"
   - "5.16"
   - "5.18"
+  - "5.20"
   - "5.20.0_thr"
   - "blead"
-matrix:
-  include:
-    - perl: "5.20.0"
-      script: prove -l -r "t" "xt"
-#   - perl: 5.18
-#     env: COVERAGE=1
 before_install:
   - git clone git://github.com/haarg/perl-travis-helper
   - source perl-travis-helper/init
@@ -25,11 +20,5 @@ before_install:
   - build-dist
   - cd $BUILD_DIR
 install:
-  - cpan-install --deps
-  - cpan-install --coverage
-before_script:
-  - coverage-setup
-script:
-  - prove -l -r "t"
-after_success:
-  - coverage-report
+     - cpanm -n -q --skip-satisfied --installdeps .
+script: prove -lmr t
