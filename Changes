@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+0.015     2014-07-13 23:10:47-04:00 America/New_York
+
     [CHANGED]
 
     - lowered minimum perl to 5.006
