@@ -18,6 +18,6 @@ before_install:
   - build-perl
   - perl -V
 install:
-  - cpan-install Test::More
+  - cpan-install Test::More Devel::GlobalDestruction MRO::Compat
 script: prove -l -r t
 # vim: ts=2 sts=2 sw=2 et:
