@@ -114,9 +114,10 @@ sub new {
         Carp::croak("$class->new() got an odd number of elements");
     }
 
-    # create object and invoke BUILD
+    # create object and invoke BUILD (unless we were given __no_BUILD__)
+    my $no_build = delete $args->{__no_BUILD__};
     my $self = bless {%$args}, $class;
-    for my $s ( reverse @$linear_isa ) {
+    for my $s ( $no_build ? () : reverse @$linear_isa ) {
         next unless my $builder = $BUILD_CACHE{$s};
         $builder->( $self, $args );
     }
