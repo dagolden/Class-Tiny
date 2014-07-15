@@ -59,15 +59,6 @@ subtest "attributes are RW" => sub {
     is( $obj->baz,     42, "accessing baz returns changed value" );
 };
 
-subtest "exceptions" => sub {
-    like(
-        exception { Baker->new( foo => 23, bar => 42, baz => 13, wibble => 0 ) },
-        qr/Invalid attributes for Baker: wibble/,
-        "creating object with 'wibble' dies",
-    );
-
-};
-
 done_testing;
 # COPYRIGHT
 # vim: ts=4 sts=4 sw=4 et:

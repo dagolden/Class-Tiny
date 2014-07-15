@@ -80,7 +80,7 @@ package Class::Tiny::Object;
 # ABSTRACT: Base class for classes built with Class::Tiny
 # VERSION
 
-my ( %LINEAR_ISA_CACHE, %BUILD_CACHE, %DEMOLISH_CACHE, %CAN_CACHE );
+my ( %LINEAR_ISA_CACHE, %BUILD_CACHE, %DEMOLISH_CACHE, %ATTR_CACHE );
 
 my $_PRECACHE = sub {
     my ($class) = @_;
@@ -93,12 +93,15 @@ my $_PRECACHE = sub {
         $BUILD_CACHE{$s}    = *{"$s\::BUILD"}{CODE};
         $DEMOLISH_CACHE{$s} = *{"$s\::DEMOLISH"}{CODE};
     }
+    $ATTR_CACHE{$class} =
+      { map { $_ => 1 } Class::Tiny->get_all_attributes_for($class) };
     return $LINEAR_ISA_CACHE{$class};
 };
 
 sub new {
-    my $class = shift;
-    my $linear_isa = $LINEAR_ISA_CACHE{$class} || $_PRECACHE->($class);
+    my $class       = shift;
+    my $linear_isa  = $LINEAR_ISA_CACHE{$class} || $_PRECACHE->($class);
+    my $valid_attrs = $ATTR_CACHE{$class};
 
     # handle hash ref or key/value arguments
     my $args;
@@ -115,20 +118,13 @@ sub new {
     }
 
     # create object and invoke BUILD (unless we were given __no_BUILD__)
-    my $no_build = delete $args->{__no_BUILD__};
-    my $self = bless {%$args}, $class;
-    for my $s ( $no_build ? () : reverse @$linear_isa ) {
+    my $self =
+      bless { map { $_ => $args->{$_} } grep { exists $valid_attrs->{$_} } keys %$args },
+      $class;
+    for my $s ( delete $args->{__no_BUILD__} ? () : reverse @$linear_isa ) {
         next unless my $builder = $BUILD_CACHE{$s};
         $builder->( $self, $args );
     }
-
-    # unknown attributes still in $args are fatal
-    my @bad;
-    for my $k ( keys %$args ) {
-        push( @bad, $k )
-          unless $CAN_CACHE{$class}{$k} ||= $self->can($k); # a heuristic to catch typos
-    }
-    Carp::croak("Invalid attributes for $class: @bad") if @bad;
 
     return $self;
 }
@@ -188,9 +184,9 @@ In F<example.pl>:
 
   my $obj = Employee->new( name => "Larry", ssn => "111-22-3333" );
 
-  # unknown attributes are fatal:
-  eval { Employee->new( name => "Larry", OS => "Linux" ) };
-  die "Error creating Employee: $@" if $@;
+  # unknown attributes are ignored
+  my $obj = Employee->new( name => "Larry", OS => "Linux" );
+  # $obj->{OS} does not exist
 
 =head1 DESCRIPTION
 
@@ -204,7 +200,6 @@ code.  Here is a list of features:
 * supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
-* C<new> has heuristics to catch constructor attribute typos
 * C<new> calls C<BUILD> for each class from parent to child
 * superclass provides a C<DESTROY> method
 * C<DESTROY> calls C<DEMOLISH> for each class from child to parent
@@ -268,9 +263,32 @@ loading Class::Tiny:
 
     sub id { ... }
 
-By declaring C<id> also with Class::Tiny, you include it in the list of known
-attributes for introspection.  Default values will not be set for custom
-accessors unless you handle that yourself.
+Even if you pre-declare a method name, you must include it in the attribute
+list for Class::Tiny to register it as a valid attribute.
+
+If you set a default for a custom accessor, your accessor will need to retrieve
+the default and do something with it:
+
+    package Foo::Bar;
+
+    use subs 'id';
+
+    use Class::Tiny qw( name ), { id => sub { int(rand(2*31)) } };
+
+    sub id {
+        my $self = shift;
+        if (@_) {
+            return $self->{id} = shift;
+        }
+        elsif ( exists $self->{id} ) {
+            return $self->{id};
+        }
+        else {
+            my $defaults =
+                Class::Tiny->get_all_attribute_defaults_for( ref $self );
+            return $self->{id} = $defaults->{id}->();
+        }
+    }
 
 =head2 Class::Tiny::Object is your base class
 
@@ -306,14 +324,11 @@ of key/value pairs:
     $obj = Foo::Bar->new( { name => "David" } );
 
 If a reference is passed as a single argument, it must be able to be
-dereferenced as a hash or an exception is thrown.  A shallow copy is made of
-the reference provided.
+dereferenced as a hash or an exception is thrown.
 
-In order to help catch typos in constructor arguments, any argument that is
-not also a valid method (e.g. an accessor or other method) will result in a
-fatal exception.  This is not perfect, but should catch typical transposition
-typos. Also see L</BUILD> for how to explicitly hide non-attribute, non-method
-arguments if desired.
+Unknown attributes in the constructor arguments will be ignored.  Prior to
+version 1.000, unknown attributes were an error, but this made it harder for
+people to cleanly subclass Class::Tiny classes so this feature was removed.
 
 =head2 BUILD
 
@@ -322,36 +337,17 @@ by the constructor from the furthest parent class down to the child class after
 the object has been created.
 
 It is passed the constructor arguments as a hash reference.  The return value
-is ignored.  Use C<BUILD> for validation or setting default values.
+is ignored.  Use C<BUILD> for validation or setting default values that
+depend on other attributes.
 
     sub BUILD {
         my ($self, $args) = @_;
-        $self->foo(42) unless defined $self->foo;
-        croak "Foo must be non-negative" if $self->foo < 0;
-    }
-
-If you want to hide a non-attribute constructor argument from validation,
-delete it from the passed-in argument hash reference.
-
-    sub BUILD {
-        my ($self, $args) = @_;
-
-        if ( delete $args->{do_something_special} ) {
-            ...
-        }
+        $self->msg( "Hello " . $self->name );
+        croak "Age must be non-negative" if $self->age < 0;
     }
 
 The argument reference is a copy, so deleting elements won't affect data in the
-object. You have to delete it from both if that's what you want.
-
-    sub BUILD {
-        my ($self, $args) = @_;
-
-        if ( delete $args->{do_something_special} ) {
-            delete $self->{do_something_special};
-            ...
-        }
-    }
+original (but changes will be passed to other BUILD methods in C<@ISA>).
 
 =head2 DEMOLISH
 
@@ -391,10 +387,10 @@ C<create_attributes> to set up the C<@ISA> array and attributes.  Anyone
 attempting to extend Class::Tiny itself should use these instead of mocking up
 a call to C<import>.
 
-When the first object is created, linearized C<@ISA> and various subroutines
-references are cached for speed.  Ensure that all inheritance and methods are
-in place before creating objects. (You don't want to be changing that once you
-create objects anyway, right?)
+When the first object is created, linearized C<@ISA>, the valid attribute list
+and various subroutine references are cached for speed.  Ensure that all
+inheritance and methods are in place before creating objects. (You don't want
+to be changing that once you create objects anyway, right?)
 
 =head1 RATIONALE
 
@@ -430,7 +426,6 @@ Specifically, here is how Class::Tiny ("C::T") compares to Object::Tiny
  provides new                       yes     yes       yes
  provides DESTROY                   yes     no        no
  new takes either hashref or list   yes     no (list) no (hash)
- new validates arguments            yes     no        no
  Moo(se)-like BUILD/DEMOLISH        yes     no        no
  no extraneous methods via @ISA     yes     yes       no
 

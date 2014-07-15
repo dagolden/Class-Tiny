@@ -24,13 +24,6 @@ subtest "destructor" => sub {
     is( $Delta::exception, 0, "cleanup worked in correct order" );
 };
 
-subtest "constructor argument heuristic hiding" => sub {
-    my $obj = new_ok( "Echo", [ foo => 42, bar => 23, a_method => 1 ] );
-    is( $obj->foo, 42, "foo is set" );
-    is( $obj->bar, 23, "bar is set" );
-    is( $obj->{a_method}, 1, "hidden constructor argument still in object" );
-};
-
 subtest "exceptions" => sub {
     like(
         exception { Echo->new( foo => 0, bar => 23 ) },

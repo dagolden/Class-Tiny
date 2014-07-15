@@ -19,8 +19,6 @@ sub BUILD {
 
     $self->bar(42) unless defined $self->bar;
     $counter++;
-
-    delete $args->{hide_me};
 }
 
 sub DEMOLISH {

@@ -14,13 +14,6 @@ subtest "attribute set as list" => sub {
     is( $obj->bar, 23, "bar is set" );
 };
 
-subtest "hiding constructor argument" => sub {
-    my $obj = new_ok( "Delta", [ foo => 42, bar => 23, hide_me => 1 ] );
-    is( $obj->foo,       42, "foo is set" );
-    is( $obj->bar,       23, "bar is set" );
-    is( $obj->{hide_me}, 1,  "hidden constructor argument still in object" );
-};
-
 subtest "__no_BUILD__" => sub {
     my $obj = new_ok( "Delta", [ __no_BUILD__ => 1 ], "new( __no_BUILD__ => 1 )" );
     is( $Delta::counter, 0, "BUILD method didn't run" );

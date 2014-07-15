@@ -22,14 +22,6 @@ subtest "lazy defaults" => sub {
     isnt( $obj->wobble, $obj2->wobble, "coderefs run for each object" );
 };
 
-subtest "exceptions" => sub {
-    like(
-        exception { Golf->new( foo => 23, bar => 42, zoom => 13 ) },
-        qr/Invalid attributes for Golf: zoom/,
-        "creating object with 'baz' dies",
-    );
-};
-
 done_testing;
 # COPYRIGHT
 # vim: ts=4 sts=4 sw=4 et:

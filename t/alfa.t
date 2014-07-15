@@ -58,13 +58,12 @@ subtest "attributes are RW" => sub {
     is( $obj->foo,     24, "accessing foo returns changed value" );
 };
 
-subtest "exceptions" => sub {
-    like(
-        exception { Alfa->new( foo => 23, bar => 42, baz => 13 ) },
-        qr/Invalid attributes for Alfa: baz/,
-        "creating object with 'baz' dies",
-    );
+subtest "unknown attributes stripped" => sub {
+    my $obj = new_ok( "Alfa", [ { wibble => 1 } ], "new( wibble => 1 )" );
+    ok( !exists $obj->{wibble}, "unknown attribute 'wibble' not in object" );
+};
 
+subtest "exceptions" => sub {
     like(
         exception { Alfa->new(qw/ foo bar baz/) },
         qr/Alfa->new\(\) got an odd number of elements/,
