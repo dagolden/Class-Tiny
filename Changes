@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+1.000     2014-07-16 09:55:29-04:00 America/New_York
+
     [*** INCOMPATIBLE CHANGES ***]
 
     - Attributes for custom accessors *MUST* be declared for them to be
