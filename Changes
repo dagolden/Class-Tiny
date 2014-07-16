@@ -2,6 +2,20 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [*** INCOMPATIBLE CHANGES ***]
+
+    - Attributes for custom accessors *MUST* be declared for them to be
+      set via the constructor.  It is no longer sufficient for a method of
+      the same name to exist.
+
+    - Unknown constructor arguments are ignored rather than fatal; they are
+      not included in the object.  Special instructions for using BUILD to
+      hide constructor arguments from validation are irrelevant and have
+      been removed.
+
+    - These changes make Class::Tiny-based classes easier to subclass by
+      more advanced object frameworks like Moose or Moo.
+
 0.015     2014-07-13 23:10:47-04:00 America/New_York
 
     [CHANGED]
