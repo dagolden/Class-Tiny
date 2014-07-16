@@ -8,7 +8,6 @@ on 'test' => sub {
   requires "ExtUtils::MakeMaker" => "0";
   requires "File::Spec::Functions" => "0";
   requires "List::Util" => "0";
-  requires "Scalar::Util" => "0";
   requires "Test::More" => "0.96";
   requires "base" => "0";
   requires "lib" => "0";
