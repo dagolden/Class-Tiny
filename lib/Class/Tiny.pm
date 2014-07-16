@@ -337,13 +337,19 @@ by the constructor from the furthest parent class down to the child class after
 the object has been created.
 
 It is passed the constructor arguments as a hash reference.  The return value
-is ignored.  Use C<BUILD> for validation or setting default values that
-depend on other attributes.
+is ignored.  Use C<BUILD> for validation, checking required attributes or
+setting default values that depend on other attributes.
 
     sub BUILD {
         my ($self, $args) = @_;
-        $self->msg( "Hello " . $self->name );
+
+        for my $req ( qw/name age/ ) {
+            croak "$req attribute required" unless defined $self->$req;
+        }
+
         croak "Age must be non-negative" if $self->age < 0;
+
+        $self->msg( "Hello " . $self->name );
     }
 
 The argument reference is a copy, so deleting elements won't affect data in the
