@@ -2,6 +2,14 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [ADDED]
+
+    - Added support for BUILDARGS for Moo(se) compatibility
+
+    [INTERNAL]
+
+    - Implements BUILDALL via method (was inline) for Moo(se) compatibility
+
 1.000     2014-07-16 09:55:29-04:00 America/New_York
 
     [*** INCOMPATIBLE CHANGES ***]

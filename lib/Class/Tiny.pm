@@ -82,54 +82,61 @@ package Class::Tiny::Object;
 
 our $VERSION = '1.001';
 
-my ( %LINEAR_ISA_CACHE, %BUILD_CACHE, %DEMOLISH_CACHE, %ATTR_CACHE );
+my ( %HAS_BUILDARGS, %BUILD_CACHE, %DEMOLISH_CACHE, %ATTR_CACHE );
 
 my $_PRECACHE = sub {
+    no warnings 'once'; # needed to avoid downstream warnings
     my ($class) = @_;
-    $LINEAR_ISA_CACHE{$class} =
+    my $linear_isa =
       @{"$class\::ISA"} == 1 && ${"$class\::ISA"}[0] eq "Class::Tiny::Object"
       ? [$class]
       : mro::get_linear_isa($class);
-    for my $s ( @{ $LINEAR_ISA_CACHE{$class} } ) {
-        no warnings 'once'; # needed to avoid downstream warnings
-        $BUILD_CACHE{$s}    = *{"$s\::BUILD"}{CODE};
-        $DEMOLISH_CACHE{$s} = *{"$s\::DEMOLISH"}{CODE};
-    }
-    $ATTR_CACHE{$class} =
+    $DEMOLISH_CACHE{$class} = [
+        map { ( *{$_}{CODE} ) ? ( *{$_}{CODE} ) : () }
+        map { "$_\::DEMOLISH" } @$linear_isa
+    ];
+    $BUILD_CACHE{$class} = [
+        map { ( *{$_}{CODE} ) ? ( *{$_}{CODE} ) : () }
+        map { "$_\::BUILD" } reverse @$linear_isa
+    ];
+    $HAS_BUILDARGS{$class} = $class->can("BUILDARGS");
+    return $ATTR_CACHE{$class} =
       { map { $_ => 1 } Class::Tiny->get_all_attributes_for($class) };
-    return $LINEAR_ISA_CACHE{$class};
 };
 
 sub new {
-    my $class       = shift;
-    my $linear_isa  = $LINEAR_ISA_CACHE{$class} || $_PRECACHE->($class);
-    my $valid_attrs = $ATTR_CACHE{$class};
+    my $class = shift;
+    my $valid_attrs = $ATTR_CACHE{$class} || $_PRECACHE->($class);
 
     # handle hash ref or key/value arguments
     my $args;
-    if ( @_ == 1 && ref $_[0] ) {
-        my %copy = eval { %{ $_[0] } }; # try shallow copy
-        Carp::croak("Argument to $class->new() could not be dereferenced as a hash") if $@;
-        $args = \%copy;
-    }
-    elsif ( @_ % 2 == 0 ) {
-        $args = {@_};
+    if ( $HAS_BUILDARGS{$class} ) {
+        $args = $class->BUILDARGS(@_);
     }
     else {
-        Carp::croak("$class->new() got an odd number of elements");
+        if ( @_ == 1 && ref $_[0] ) {
+            my %copy = eval { %{ $_[0] } }; # try shallow copy
+            Carp::croak("Argument to $class->new() could not be dereferenced as a hash") if $@;
+            $args = \%copy;
+        }
+        elsif ( @_ % 2 == 0 ) {
+            $args = {@_};
+        }
+        else {
+            Carp::croak("$class->new() got an odd number of elements");
+        }
     }
 
     # create object and invoke BUILD (unless we were given __no_BUILD__)
     my $self =
       bless { map { $_ => $args->{$_} } grep { exists $valid_attrs->{$_} } keys %$args },
       $class;
-    for my $s ( delete $args->{__no_BUILD__} ? () : reverse @$linear_isa ) {
-        next unless my $builder = $BUILD_CACHE{$s};
-        $builder->( $self, $args );
-    }
+    $self->BUILDALL($args) if !delete $args->{__no_BUILD__} && @{ $BUILD_CACHE{$class} };
 
     return $self;
 }
+
+sub BUILDALL { $_->(@_) for @{ $BUILD_CACHE{ ref $_[0] } } }
 
 # Adapted from Moo and its dependencies
 require Devel::GlobalDestruction unless defined ${^GLOBAL_PHASE};
@@ -141,8 +148,7 @@ sub DESTROY {
       defined ${^GLOBAL_PHASE}
       ? ${^GLOBAL_PHASE} eq 'DESTRUCT'
       : Devel::GlobalDestruction::in_global_destruction();
-    for my $s ( @{ $LINEAR_ISA_CACHE{$class} } ) {
-        next unless my $demolisher = $DEMOLISH_CACHE{$s};
+    for my $demolisher ( @{ $DEMOLISH_CACHE{$class} } ) {
         my $e = do {
             local ( $?, $@ );
             eval { $demolisher->( $self, $in_global_destruction ) };
@@ -202,6 +208,7 @@ code.  Here is a list of features:
 * supports custom accessors
 * superclass provides a standard C<new> constructor
 * C<new> takes a hash reference or list of key/value pairs
+* C<new> supports providing C<BUILDARGS> to customize constructor options
 * C<new> calls C<BUILD> for each class from parent to child
 * superclass provides a C<DESTROY> method
 * C<DESTROY> calls C<DEMOLISH> for each class from child to parent
@@ -332,6 +339,22 @@ Unknown attributes in the constructor arguments will be ignored.  Prior to
 version 1.000, unknown attributes were an error, but this made it harder for
 people to cleanly subclass Class::Tiny classes so this feature was removed.
 
+You can define a C<BUILDARGS> method to change how arguments to new are
+handled.  It will receive the constructor arguments as they were provided and
+must return a hash reference of key/value pairs (or else throw an
+exception).
+
+    sub BUILDARGS {
+       my $class = shift;
+       my $name = shift || "John Doe";
+       return { name => $name };
+     };
+
+     Foo::Bar->new( "David" );
+     Foo::Bar->new(); # "John Doe"
+
+Unknown attributes returned from C<BUILDARGS> will be ignored.
+
 =head2 BUILD
 
 If your class or any superclass defines a C<BUILD> method, it will be called
@@ -435,6 +458,7 @@ Specifically, here is how Class::Tiny ("C::T") compares to Object::Tiny
  provides DESTROY                   yes     no        no
  new takes either hashref or list   yes     no (list) no (hash)
  Moo(se)-like BUILD/DEMOLISH        yes     no        no
+ Moo(se)-like BUILDARGS             yes     no        no
  no extraneous methods via @ISA     yes     yes       no
 
 =head2 Why this instead of Moose or Moo?
