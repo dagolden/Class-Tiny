@@ -1,23 +1,37 @@
+sudo: false
 language: perl
 perl:
   - "5.6.2"
   - "5.8.1"
-  - "5.8"
-  - "5.8.9-thr"
+  - "5.8.8"
+  - "5.8.8-thr"
   - "5.10"
   - "5.12"
   - "5.14"
   - "5.16"
   - "5.18"
   - "5.20"
-  - "5.20.0-thr"
+  - "5.22.0"
+  - "5.22.0-thr"
   - "blead"
+matrix:
+  include:
+    - perl: 5.18
+      env: COVERAGE=1
+  allow_failures:
+    - perl: "blead"
 before_install:
-  - git clone git://github.com/haarg/perl-travis-helper
-  - source perl-travis-helper/init
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init
   - build-perl
   - perl -V
 install:
-  - cpan-install Test::More Devel::GlobalDestruction MRO::Compat
-script: prove -l -r t
+  - cpan-install --deps       # installs prereqs, including recommends
+  - cpan-install --coverage   # installs converage prereqs, if enabled
+before_script:
+  - coverage-setup
+script:
+  - prove -l -j$(test-jobs) $(test-files)   # parallel testing
+after_success:
+  - coverage-report
 # vim: ts=2 sts=2 sw=2 et:
