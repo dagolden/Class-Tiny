@@ -36,26 +36,38 @@ sub create_attributes {
           or Carp::croak "Invalid accessor name '$_'"
     } keys %defaults;
     $CLASS_ATTRIBUTES{$pkg}{$_} = $defaults{$_} for @attr;
-    _gen_accessor( $pkg, $_ ) for grep { !*{"$pkg\::$_"}{CODE} } @attr;
+    $class->_gen_accessor( $pkg, $_ ) for grep { !*{"$pkg\::$_"}{CODE} } @attr;
     Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
 }
 
 sub _gen_accessor {
-    my ( $pkg, $name ) = @_;
+    my ( $class, $pkg, $name ) = @_;
     my $outer_default = $CLASS_ATTRIBUTES{$pkg}{$name};
 
-    my $sub = "sub $name { if (\@_ == 1) {";
-    if ( defined $outer_default && ref $outer_default eq 'CODE' ) {
-        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default->(\$_[0]) }";
-    }
-    elsif ( defined $outer_default ) {
-        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default }";
-    }
-    $sub .= "return \$_[0]{$name} } else { return \$_[0]{$name}=\$_[1] } }";
+    my $sub =
+      $class->__gen_sub_body( $name, defined($outer_default), ref($outer_default) );
 
     # default = outer_default avoids "won't stay shared" bug
     eval "package $pkg; my \$default=\$outer_default; $sub"; ## no critic
     Carp::croak("Failed to generate attributes for $pkg: $@\n") if $@;
+}
+
+# Assume that a '$default' will be in scope with any default value/sub
+sub __gen_sub_body {
+    my ( $self, $name, $has_default, $default_type ) = @_;
+
+    my $sub = "sub $name { if (\@_ == 1) {";
+
+    if ( $has_default && $default_type eq 'CODE' ) {
+        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default->(\$_[0]) }";
+    }
+    elsif ($has_default) {
+        $sub .= "if ( !exists \$_[0]{$name} ) { \$_[0]{$name} = \$default }";
+    }
+
+    $sub .= "return \$_[0]{$name} } else { return \$_[0]{$name}=\$_[1] } }";
+
+    return $sub;
 }
 
 sub get_all_attributes_for {
