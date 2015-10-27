@@ -1,7 +1,6 @@
 sudo: false
 language: perl
 perl:
-  - "5.6.2"
   - "5.8.1"
   - "5.8.8"
   - "5.8.8-thr"
