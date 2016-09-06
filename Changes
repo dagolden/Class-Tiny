@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+1.005     2016-09-06 12:12:06-04:00 America/New_York (TRIAL RELEASE)
+
     [INTERNAL]
 
     - Optimize generated accessors (5% to 25% faster depending on
