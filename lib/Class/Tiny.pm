@@ -105,8 +105,8 @@ sub get_all_attribute_defaults_for {
     my ( $class, $pkg ) = @_;
     my $defaults = {};
     for my $p ( reverse @{ mro::get_linear_isa($pkg) } ) {
-        while ( my ( $k, $v ) = each %{ $CLASS_ATTRIBUTES{$p} || {} } ) {
-            $defaults->{$k} = $v;
+        for my $k ( keys %{ $CLASS_ATTRIBUTES{$p} || {} } ) {
+            $defaults->{$k} = $CLASS_ATTRIBUTES{$p}{$k};
         }
     }
     return $defaults;
