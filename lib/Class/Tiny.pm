@@ -15,6 +15,8 @@ require( $] >= 5.010 ? "mro.pm" : "MRO/Compat.pm" ); ## no critic:
 
 my %CLASS_ATTRIBUTES;
 
+my $HAS_XS = eval { require Class::XSAccessor; 1 };
+
 sub import {
     my $class = shift;
     my $pkg   = caller;
@@ -82,6 +84,11 @@ sub $name {
         : ( \$_[0]{$name} = ( \@_ == 2 ) ? \$_[1] : \$default )
     );
 }
+HERE
+    }
+    elsif ($HAS_XS) {
+        return << "HERE";
+    use Class::XSAccessor accessors => [ $name => ];
 HERE
     }
     else {
