@@ -15,7 +15,8 @@ require( $] >= 5.010 ? "mro.pm" : "MRO/Compat.pm" ); ## no critic:
 
 my %CLASS_ATTRIBUTES;
 
-my $HAS_XS = eval { require Class::XSAccessor; 1 };
+my $HAS_XS = !$ENV{PERL_CLASS_TINY_PP}
+    && eval { require Class::XSAccessor; 1 };
 
 sub import {
     my $class = shift;
