@@ -31,7 +31,7 @@ sub prepare_class {
 sub create_attributes {
     my ( $class, $pkg, @spec ) = @_;
     my %defaults = map { ref $_ eq 'HASH' ? %$_ : ( $_ => undef ) } @spec;
-    my @attr = grep {
+    my @attr     = grep {
         defined and !ref and /^[^\W\d]\w*$/s
           or Carp::croak "Invalid accessor name '$_'"
     } keys %defaults;
@@ -140,7 +140,7 @@ my $_PRECACHE = sub {
 };
 
 sub new {
-    my $class = shift;
+    my $class       = shift;
     my $valid_attrs = $ATTR_CACHE{$class} || $_PRECACHE->($class);
 
     # handle hash ref or key/value arguments
@@ -457,6 +457,18 @@ When the first object is created, linearized C<@ISA>, the valid attribute list
 and various subroutine references are cached for speed.  Ensure that all
 inheritance and methods are in place before creating objects. (You don't want
 to be changing that once you create objects anyway, right?)
+
+=head2 Type constraints (C<isa> relationships)
+
+Class::Tiny does not natively apply type constraints to any attributes.
+For example, there is no equivalent of the Moose C<isa> (e.g.,
+C<< has 'birth_date' => ( isa => 'DateTime'); >>).  You can apply constraints
+manually by providing custom accessors (see L</Defining attributes>).
+
+One shortcut is separately-distributed package
+L<Class::Tiny::ConstrainedAccessor>.  This package can create a custom accessor
+that will apply a L<Type::Tiny>, L<MooseX::Types>, L<MooX::Types::MooseLike>,
+L<MouseX::Types>, or L<Specio> type constraint.
 
 =head1 RATIONALE
 
