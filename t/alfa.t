@@ -46,7 +46,7 @@ subtest "both attributes set as hash ref" => sub {
 
 subtest "constructor makes shallow copy" => sub {
     my $fake = bless { foo => 23, bar => 42 }, "Fake";
-    my $obj = new_ok( "Alfa", [$fake] );
+    my $obj  = new_ok( "Alfa", [$fake] );
     is( ref $fake, "Fake", "object passed to constructor is original class" );
     is( $obj->foo, 23,     "foo is set" );
     is( $obj->bar, 42,     "bar is set" );

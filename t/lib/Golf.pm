@@ -4,9 +4,11 @@ use warnings;
 
 package Golf;
 
-use Class::Tiny qw/foo bar/, {
+use Class::Tiny qw/foo bar/,
+  {
     wibble => 42,
     wobble => sub { [] },
-}, qw/zig zag/;
+  },
+  qw/zig zag/;
 
 1;
