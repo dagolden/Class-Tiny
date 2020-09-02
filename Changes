@@ -2,6 +2,11 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+    [DOCUMENTATION]
+
+    - DEMOLISH docs incorrectly claimed that errors were thrown.  Updated to
+      say that errors are rethrown.
+
 1.006     2016-09-10 14:47:49-04:00 America/New_York
 
     - No changes since 1.005

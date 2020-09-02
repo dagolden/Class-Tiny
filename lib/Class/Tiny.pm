@@ -421,7 +421,7 @@ Class::Tiny provides a C<DESTROY> method.  If your class or any superclass
 defines a C<DEMOLISH> method, they will be called from the child class to the
 furthest parent class during object destruction.  It is provided a single
 boolean argument indicating whether Perl is in global destruction.  Return
-values and errors are ignored.
+values are ignored.  Errors are caught and rethrown.
 
     sub DEMOLISH {
         my ($self, $global_destruct) = @_;
