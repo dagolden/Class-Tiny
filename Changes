@@ -2,6 +2,8 @@ Revision history for Class-Tiny
 
 {{$NEXT}}
 
+1.007     2020-09-02 07:02:55-04:00 America/New_York (TRIAL RELEASE)
+
     [DOCUMENTATION]
 
     - DEMOLISH docs incorrectly claimed that errors were thrown.  Updated to
