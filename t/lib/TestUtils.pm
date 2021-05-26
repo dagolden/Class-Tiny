@@ -1,14 +1,15 @@
 use 5.006;
 use strict;
 use warnings;
+
 package TestUtils;
 
 use Carp;
 
 use Exporter;
-our @ISA = qw/Exporter/;
+our @ISA    = qw/Exporter/;
 our @EXPORT = qw(
-    exception
+  exception
 );
 
 # If we have Test::FailWarnings, use it
@@ -17,9 +18,9 @@ BEGIN {
 }
 
 sub exception(&) {
-    my $code = shift;
+    my $code    = shift;
     my $success = eval { $code->(); 1 };
-    my $err = $@;
+    my $err     = $@;
     return '' if $success;
     croak "Execution died, but the error was lost" unless $@;
     return $@;
